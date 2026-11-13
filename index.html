@@ -11,6 +11,10 @@
     <!-- Google Fonts (Sarabun) -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Leaflet CSS & JS สำหรับระบบแผนที่แบบโต้ตอบ (Interactive Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -153,16 +157,21 @@
                 
                 <!-- Left/Main Column: Map & Signals -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Google Maps Evacuation Navigation -->
+                    <!-- Evacuation Map -->
                     <div class="bg-white rounded-2xl shadow-card overflow-hidden border border-gray-100">
                         <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 class="font-bold text-gray-800"><i class="fas fa-map-marked-alt text-blue-600 mr-2"></i> ระบบนำทางอพยพ (Google Maps)</h3>
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-semibold"><i class="fas fa-satellite-dish mr-1"></i> GPS Live</span>
+                            <h3 class="font-bold text-gray-800"><i class="fas fa-map-marked-alt text-blue-600 mr-2"></i> ระบบแผนที่และรายงานภัย (Live Map)</h3>
+                            <button id="btn-report" onclick="toggleReportMode()" class="bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-1.5 rounded-full font-bold transition flex items-center gap-1 shadow-sm border border-red-200">
+                                <i class="fas fa-exclamation-triangle"></i> แจ้งสิ่งกีดขวาง
+                            </button>
                         </div>
                         
-                        <!-- Embedded General Map for Patong -->
-                        <div class="h-64 w-full z-10 border-b border-gray-100 relative bg-gray-100">
-                            <iframe src="https://maps.google.com/maps?q=ป่าตอง&t=&z=14&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+                        <!-- Interactive Map Container -->
+                        <div id="map" class="h-64 w-full z-10 border-b border-gray-100 relative bg-gray-200 cursor-default"></div>
+                        
+                        <!-- แจ้งเตือนสถานะการปักหมุด -->
+                        <div id="report-toast" class="hidden bg-red-600 text-white text-sm text-center py-2 font-bold animate-pulse">
+                            <i class="fas fa-hand-pointer mr-1"></i> กรุณาคลิกบนแผนที่เพื่อระบุจุดที่มีสิ่งกีดขวาง
                         </div>
 
                         <!-- Navigation Buttons -->
@@ -543,7 +552,124 @@
             const activeBtn = document.getElementById('btn-' + tabId);
             activeBtn.classList.remove('tab-inactive');
             activeBtn.classList.add('tab-active');
+            
+            // Re-render map เมื่อเปิดกลับมาหน้าแผนที่ (ป้องกันแผนที่โหลดไม่เต็มกรอบ)
+            if(tabId === 'risk' && map) {
+                setTimeout(() => { map.invalidateSize(); }, 100);
+            }
         }
+
+        // --- ระบบแผนที่ (Leaflet.js) และการแจ้งสิ่งกีดขวาง ---
+        let map;
+        let isReportingMode = false;
+        let obstacles = [];
+
+        function initMap() {
+            // พิกัดหาดป่าตอง ภูเก็ต
+            map = L.map('map').setView([7.8965, 98.2970], 14);
+
+            // โหลดแผนที่จาก OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // สร้างไอคอนแบบกำหนดเอง
+            const dangerIcon = L.divIcon({
+                className: 'custom-icon',
+                html: '<div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white animate-bounce"><i class="fas fa-water text-xs"></i></div>',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32]
+            });
+
+            const safeIcon = L.divIcon({
+                className: 'custom-icon',
+                html: '<div class="bg-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg border-2 border-white"><i class="fas fa-hospital-symbol"></i></div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+
+            // ปักหมุดจุดเริ่มต้น (หาด)
+            L.marker([7.8935, 98.2940], {icon: dangerIcon}).addTo(map)
+                .bindPopup('<b>จุดเสี่ยงสึนามิ</b><br>พื้นที่หาดป่าตอง');
+
+            // ปักหมุดจุดปลอดภัย (โรงพยาบาลป่าตอง)
+            L.marker([7.8990, 98.3050], {icon: safeIcon}).addTo(map)
+                .bindPopup('<b>จุดปลอดภัย (Safe Zone)</b><br>โรงพยาบาลป่าตอง');
+
+            // โหลดสิ่งกีดขวางที่เคยแจ้งไว้จาก LocalStorage
+            loadObstacles();
+
+            // อีเวนต์คลิกบนแผนที่ (สำหรับตอนเปิดโหมดรายงาน)
+            map.on('click', function(e) {
+                if (isReportingMode) {
+                    addObstacle(e.latlng.lat, e.latlng.lng);
+                    toggleReportMode(); // ปิดโหมดหลังคลิกเสร็จ
+                    openModal('รับแจ้งเหตุสำเร็จ', 'ระบบได้บันทึกจุดสิ่งกีดขวาง/เส้นทางติดขัดของท่านแล้ว ข้อมูลนี้จะถูกส่งไปที่ศูนย์ EOC ทันที', 'fa-check-circle', 'text-green-500', 'bg-green-50');
+                }
+            });
+        }
+
+        // ฟังก์ชันเปิด/ปิด โหมดแจ้งสิ่งกีดขวาง
+        function toggleReportMode() {
+            isReportingMode = !isReportingMode;
+            const btn = document.getElementById('btn-report');
+            const toast = document.getElementById('report-toast');
+            const mapContainer = document.getElementById('map');
+            
+            if (isReportingMode) {
+                btn.classList.replace('bg-red-100', 'bg-red-600');
+                btn.classList.replace('text-red-700', 'text-white');
+                btn.innerHTML = '<i class="fas fa-times"></i> ยกเลิกแจ้งเหตุ';
+                toast.classList.remove('hidden');
+                mapContainer.classList.add('cursor-crosshair');
+                mapContainer.classList.remove('cursor-default');
+            } else {
+                btn.classList.replace('bg-red-600', 'bg-red-100');
+                btn.classList.replace('text-white', 'text-red-700');
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> แจ้งสิ่งกีดขวาง';
+                toast.classList.add('hidden');
+                mapContainer.classList.remove('cursor-crosshair');
+                mapContainer.classList.add('cursor-default');
+            }
+        }
+
+        // ฟังก์ชันเพิ่มหมุดสิ่งกีดขวางและเซฟ
+        function addObstacle(lat, lng) {
+            const obstacleIcon = L.divIcon({
+                className: 'custom-icon',
+                html: '<div class="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md border-2 border-white"><i class="fas fa-times text-[10px]"></i></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            L.marker([lat, lng], {icon: obstacleIcon}).addTo(map)
+                .bindPopup('<b><i class="fas fa-exclamation-triangle text-red-500"></i> สิ่งกีดขวาง / รถติด</b><br>แจ้งโดยประชาชน');
+            
+            obstacles.push({ lat: lat, lng: lng });
+            localStorage.setItem('moph_obstacles', JSON.stringify(obstacles));
+        }
+
+        // โหลดข้อมูลหมุดสิ่งกีดขวาง
+        function loadObstacles() {
+            const saved = localStorage.getItem('moph_obstacles');
+            if (saved) {
+                obstacles = JSON.parse(saved);
+                obstacles.forEach(obs => {
+                    const obstacleIcon = L.divIcon({
+                        className: 'custom-icon',
+                        html: '<div class="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md border-2 border-white"><i class="fas fa-times text-[10px]"></i></div>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    L.marker([obs.lat, obs.lng], {icon: obstacleIcon}).addTo(map)
+                        .bindPopup('<b><i class="fas fa-exclamation-triangle text-red-500"></i> สิ่งกีดขวาง / รถติด</b><br>แจ้งโดยประชาชน');
+                });
+            }
+        }
+
+        // ฟังก์ชันเคลียร์สิ่งกีดขวางทั้งหมด (สำหรับใช้รีเซ็ตตอนทดสอบ)
+        // พิมพ์ localStorage.removeItem('moph_obstacles') ใน Console ของเบราว์เซอร์ได้เลย
 
         // --- 2. Checklist & LocalStorage Logic (ทำให้ระบบจำได้จริง) ---
         // เพิ่ม ID ของ Checkbox ที่เพิ่มเข้ามาใหม่
@@ -620,6 +746,7 @@
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             initChecklist();
+            initMap();
         });
     </script>
 </body>
