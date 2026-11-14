@@ -696,9 +696,10 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ใช้ Config ของผู้ใช้ที่ให้มา
+        // ⚠️ ลบ API Key จริงออกเพื่อแก้ไขปัญหา GitHub Security Alert
+        // หากต้องการนำเว็บไปรันจริงบน GitHub Pages คุณต้องนำ API Key ของจริงมาใส่คืน
         const userConfig = {
-            apiKey: "AIzaSyAaqQ77vaYMeTMecseqEIu2O-wWUOBMz9A",
+            apiKey: "YOUR_API_KEY_HERE",
             authDomain: "pb287-4fc76.firebaseapp.com",
             projectId: "pb287-4fc76",
             storageBucket: "pb287-4fc76.firebasestorage.app",
