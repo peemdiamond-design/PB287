@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พอร์ทัลเตรียมความพร้อมภัยพิบัติ - กระทรวงสาธารณสุข</title>
+    <title>All-Hazards Portal - ศูนย์แจ้งเตือนทุกภัยพิบัติ กระทรวงสาธารณสุข</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -11,7 +11,7 @@
     <!-- Google Fonts (Sarabun) -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Leaflet CSS & JS สำหรับระบบแผนที่แบบโต้ตอบ (Interactive Map) -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -21,42 +21,26 @@
                 extend: {
                     fontFamily: { sans: ['Sarabun', 'sans-serif'] },
                     colors: {
-                        moph: {
-                            primary: '#005C2D',   // เขียวสาธารณสุข
-                            secondary: '#DFA129', // ทอง/เหลืองทางการ
-                            light: '#F4F7F6',
-                            dark: '#003D1E',
-                            surface: '#ffffff'
-                        },
-                        alert: {
-                            warning: '#F59E0B',
-                            danger: '#DC2626'
-                        }
+                        moph: { primary: '#005C2D', secondary: '#DFA129', light: '#F4F7F6', dark: '#003D1E', surface: '#ffffff' },
+                        alert: { warning: '#F59E0B', danger: '#DC2626', info: '#3B82F6' }
                     },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'card': '0 2px 10px rgba(0, 0, 0, 0.03)'
-                    }
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', 'card': '0 2px 10px rgba(0, 0, 0, 0.03)' }
                 }
             }
         }
     </script>
     <style>
         body { background-color: #F4F7F6; -webkit-tap-highlight-color: transparent; }
-        
-        /* Custom Scrollbar for sleek look */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #005C2D; }
         
-        /* Segmented Control for Tabs */
         .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .tab-active { background-color: #005C2D; color: white; box-shadow: 0 2px 4px rgba(0,92,45,0.2); }
         .tab-inactive { background-color: transparent; color: #4B5563; }
         .tab-inactive:hover { background-color: #E5E7EB; }
         
-        /* Animations */
         @keyframes pulse-ring {
             0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
@@ -64,12 +48,8 @@
         }
         .status-dot { animation: pulse-ring 2s infinite; }
         .fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SOS Pulse Animations */
         @keyframes sos-pulse {
             0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(var(--sos-color), 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(var(--sos-color), 0); }
@@ -78,12 +58,17 @@
         .sos-icon-red { --sos-color: 220, 38, 38; animation: sos-pulse 1.5s infinite; }
         .sos-icon-yellow { --sos-color: 234, 179, 8; animation: sos-pulse 1.5s infinite; }
         .sos-icon-green { --sos-color: 22, 163, 74; animation: sos-pulse 1.5s infinite; }
+
+        /* Ticker Animation */
+        .ticker-wrap { width: 100%; overflow: hidden; background-color: #FEF3C7; padding: 8px 0; border-bottom: 1px solid #FDE68A; }
+        .ticker { display: inline-block; white-space: nowrap; padding-right: 100%; animation: ticker 25s linear infinite; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
     </style>
 </head>
 <body class="text-gray-800 antialiased flex flex-col min-h-screen">
 
-    <!-- Custom Modal (General) -->
-    <div id="customModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
+    <!-- General Alert Modal -->
+    <div id="customModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl transform transition-all">
             <div class="text-center">
                 <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-blue-50 mb-4" id="modalIconContainer">
@@ -93,9 +78,7 @@
                 <p class="text-sm text-gray-600 leading-relaxed" id="modalMessage">ข้อความ</p>
             </div>
             <div class="mt-6">
-                <button type="button" onclick="closeModal()" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-3 bg-moph-primary text-base font-medium text-white hover:bg-moph-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-moph-primary transition-colors">
-                    รับทราบ
-                </button>
+                <button type="button" onclick="closeModal()" class="w-full inline-flex justify-center rounded-xl px-4 py-3 bg-moph-primary text-white hover:bg-moph-dark transition-colors font-bold">รับทราบ</button>
             </div>
         </div>
     </div>
@@ -110,25 +93,21 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-1">ระบุระดับความช่วยเหลือ (Triage)</h3>
                 <p class="text-sm text-gray-500">กรุณาเลือกสถานะที่ตรงกับท่านมากที่สุด เพื่อให้ EOC จัดลำดับความสำคัญ</p>
             </div>
-            
             <div class="space-y-3">
-                <!-- Red -->
                 <button onclick="submitSos('red')" class="w-full text-left p-4 rounded-xl border-2 border-red-200 hover:border-red-500 hover:bg-red-50 transition-all group flex items-start gap-4">
                     <div class="w-6 h-6 rounded-full bg-red-500 flex-shrink-0 mt-0.5 shadow-md group-hover:scale-110 transition-transform"></div>
                     <div>
                         <h4 class="font-bold text-red-700">สีแดง (วิกฤต / ฉุกเฉิน)</h4>
-                        <p class="text-xs text-gray-600 mt-1">บาดเจ็บรุนแรง, เลือดออกมาก, ติดใต้ซาก, หรือหมดสติ (ต้องการทีมกู้ชีพด่วนที่สุด)</p>
+                        <p class="text-xs text-gray-600 mt-1">บาดเจ็บรุนแรง, เลือดออกมาก, หายใจไม่ออก, หรือหมดสติ (ต้องการทีมกู้ชีพด่วนที่สุด)</p>
                     </div>
                 </button>
-                <!-- Yellow -->
                 <button onclick="submitSos('yellow')" class="w-full text-left p-4 rounded-xl border-2 border-yellow-200 hover:border-yellow-500 hover:bg-yellow-50 transition-all group flex items-start gap-4">
                     <div class="w-6 h-6 rounded-full bg-yellow-500 flex-shrink-0 mt-0.5 shadow-md group-hover:scale-110 transition-transform"></div>
                     <div>
                         <h4 class="font-bold text-yellow-700">สีเหลือง (เร่งด่วน)</h4>
-                        <p class="text-xs text-gray-600 mt-1">บาดเจ็บปานกลาง, เป็นกลุ่มเปราะบาง (คนแก่/พิการ) ที่อพยพด้วยตัวเองไม่ได้</p>
+                        <p class="text-xs text-gray-600 mt-1">บาดเจ็บปานกลาง, กลุ่มเปราะบาง (คนแก่/พิการ/เด็ก) ที่อพยพด้วยตัวเองไม่ได้</p>
                     </div>
                 </button>
-                <!-- Green -->
                 <button onclick="submitSos('green')" class="w-full text-left p-4 rounded-xl border-2 border-green-200 hover:border-green-500 hover:bg-green-50 transition-all group flex items-start gap-4">
                     <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 mt-0.5 shadow-md group-hover:scale-110 transition-transform"></div>
                     <div>
@@ -137,19 +116,72 @@
                     </div>
                 </button>
             </div>
-            
             <div class="mt-5 text-center">
-                <button type="button" onclick="cancelSos()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 underline">
-                    ยกเลิกการแจ้งเหตุ
-                </button>
+                <button type="button" onclick="cancelSos()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 underline">ยกเลิกการแจ้งเหตุ</button>
             </div>
         </div>
     </div>
 
-    <!-- Live Status Banner -->
-    <div class="bg-alert-warning text-yellow-900 px-4 py-2 text-sm font-medium flex items-center justify-center gap-3">
-        <div class="w-2.5 h-2.5 bg-yellow-100 rounded-full status-dot"></div>
-        <span>สถานการณ์พื้นที่อันดามัน: <strong>เฝ้าระวังระดับ 2 (ติดตามระดับน้ำทะเล)</strong></span>
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+            <div class="text-center mb-5">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
+                    <i class="fas fa-user-shield text-gray-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">EOC Admin Login</h3>
+                <p class="text-sm text-gray-500">สำหรับเจ้าหน้าที่ศูนย์ปฏิบัติการเท่านั้น</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน (Password)</label>
+                    <input type="password" id="adminPwd" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-moph-primary focus:border-moph-primary" placeholder="ใส่รหัสผ่าน...">
+                    <p id="adminLoginError" class="text-xs text-red-500 mt-1 hidden">รหัสผ่านไม่ถูกต้อง (รหัสทดสอบ: eoc287)</p>
+                </div>
+                <button onclick="loginAdmin()" class="w-full bg-moph-primary text-white font-bold py-2 rounded-lg hover:bg-moph-dark transition">เข้าสู่ระบบ</button>
+                <button onclick="closeAdminLogin()" class="w-full text-gray-500 text-sm font-semibold hover:text-gray-700">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div id="adminDashboardModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-5 border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-900"><i class="fas fa-broadcast-tower text-moph-primary mr-2"></i> ระบบจัดการแจ้งเตือนภัย (Live Alerts)</h3>
+                <button onclick="closeAdminDashboard()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <!-- เพิ่มการแจ้งเตือน -->
+            <div class="bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">
+                <h4 class="font-bold text-blue-900 text-sm mb-3">ยกระดับ / เพิ่มประกาศใหม่</h4>
+                <div class="space-y-3">
+                    <input type="text" id="newAlertText" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="เช่น น้ำท่วมฉับพลัน: อพยพขึ้นที่สูงระดับ 2">
+                    <div class="flex gap-2">
+                        <select id="newAlertSeverity" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold">
+                            <option value="blue" class="text-blue-600">ข้อมูลทั่วไป (สีน้ำเงิน)</option>
+                            <option value="yellow" class="text-yellow-600">เฝ้าระวัง (สีเหลือง)</option>
+                            <option value="orange" class="text-orange-600">เตือนภัย (สีส้ม)</option>
+                            <option value="red" class="text-red-600">วิกฤต / อพยพด่วน (สีแดง)</option>
+                        </select>
+                        <button onclick="addNewAlert()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">ส่งประกาศ</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- รายการแจ้งเตือนปัจจุบัน -->
+            <h4 class="font-bold text-gray-800 text-sm mb-2">ประกาศที่กำลังแสดงผลหน้าเว็บ (Real-time)</h4>
+            <div id="adminAlertList" class="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[30vh]">
+                <p class="text-sm text-gray-500 text-center py-4">กำลังโหลดข้อมูลจากระบบ Cloud...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Hazard Live Ticker -->
+    <div class="ticker-wrap relative z-30">
+        <div class="ticker text-sm font-bold text-yellow-900 flex gap-8" id="live-ticker">
+            <span class="flex items-center gap-2"><div class="w-2 h-2 bg-gray-500 rounded-full status-dot"></div> กำลังเชื่อมต่อระบบศูนย์แจ้งเตือน EOC...</span>
+        </div>
     </div>
 
     <!-- Navigation / Header -->
@@ -157,14 +189,17 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16 md:h-20">
                 <div class="flex items-center gap-3 md:gap-4">
-                    <img src="/Photo/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg" alt="ตรากระทรวงสาธารณสุข" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm">
+                    <img src="/Photo/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg" alt="ตรากระทรวงสาธารณสุข" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/e/eb/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg'" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm">
                     <div class="flex flex-col">
-                        <h1 class="text-lg md:text-xl font-bold text-moph-primary leading-tight">กระทรวงสาธารณสุข</h1>
-                        <p class="text-xs md:text-sm text-gray-500 font-medium">MOPH Emergency Response</p>
+                        <h1 class="text-lg md:text-xl font-bold text-moph-primary leading-tight">ระบบ EOC ศูนย์รับมือภัยพิบัติ</h1>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium">All-Hazards Emergency Portal</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="openModal('Language / ภาษา', 'ฟังก์ชันการสลับภาษา (TH/EN) สำหรับให้บริการข้อมูลแก่นักท่องเที่ยวต่างชาติกำลังอยู่ในระหว่างเชื่อมต่อ API', 'fa-globe', 'text-blue-500', 'bg-blue-50')" class="text-gray-500 hover:text-moph-primary bg-gray-50 hover:bg-green-50 px-3 py-2 rounded-lg transition-colors text-sm font-medium border border-gray-200">
+                    <button onclick="openAdminLogin()" class="text-gray-400 hover:text-moph-primary bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg transition-colors" title="สำหรับเจ้าหน้าที่ EOC">
+                        <i class="fas fa-lock"></i>
+                    </button>
+                    <button onclick="openModal('Language / ภาษา', 'ฟังก์ชันการสลับภาษา (TH/EN) กำลังอยู่ในระหว่างเชื่อมต่อ', 'fa-globe', 'text-blue-500', 'bg-blue-50')" class="text-gray-500 hover:text-moph-primary bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-medium">
                         <i class="fas fa-language text-lg"></i> <span class="hidden sm:inline ml-1">EN</span>
                     </button>
                 </div>
@@ -175,29 +210,16 @@
     <!-- Main Content Area -->
     <main class="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         
-        <!-- Page Title & Controls -->
         <div class="mb-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <span class="inline-block px-3 py-1 bg-green-100 text-moph-primary text-xs font-bold rounded-full mb-3">คู่มือประชาชน / Public Guide</span>
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">แนวทางปฏิบัติ: ภัยพิบัติสึนามิ</h2>
-                    <p class="text-gray-600">ข้อมูลการเอาชีวิตรอด การปฐมพยาบาลทางใจ และสุขอนามัย (ครอบคลุม CLO 3)</p>
-                </div>
-                <div class="flex gap-2">
-                    <button class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-                        <i class="fas fa-share-alt"></i> แชร์
-                    </button>
-                    <button class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-                        <i class="fas fa-print"></i> พิมพ์
-                    </button>
-                </div>
-            </div>
+            <span class="inline-block px-3 py-1 bg-green-100 text-moph-primary text-xs font-bold rounded-full mb-3">คู่มือประชาชน / All-Hazard Guide</span>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">พอร์ทัลเตรียมพร้อมรับมือภัยพิบัติ</h2>
+            <p class="text-gray-600">ข้อมูลการเอาชีวิตรอดจากภัยทุกประเภท การปฐมพยาบาลทางใจ และสุขอนามัย (ครอบคลุมวงจรภัยพิบัติ)</p>
         </div>
 
         <!-- App-like Segmented Tabs -->
         <div class="bg-gray-200/60 p-1 rounded-xl flex overflow-x-auto mb-8 shadow-inner no-scrollbar">
             <button onclick="switchTab('risk')" id="btn-risk" class="tab-btn tab-active flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
-                <i class="fas fa-route"></i> อพยพ & แผนที่
+                <i class="fas fa-map-marked-alt"></i> แผนที่ & การเอาชีวิตรอด
             </button>
             <button onclick="switchTab('mental')" id="btn-mental" class="tab-btn tab-inactive flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
                 <i class="fas fa-hand-holding-heart"></i> ดูแลจิตใจ (PFA)
@@ -207,176 +229,150 @@
             </button>
         </div>
 
-        <!-- Tab 1: สื่อสารความเสี่ยง (Risk & Evacuation) -->
+        <!-- Tab 1: Risk, Map & SOPs -->
         <div id="tab-risk" class="tab-content block fade-in-up">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                <!-- Left/Main Column: Map & Signals -->
+                <!-- Left/Main Column: Map & All-Hazard SOPs -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Evacuation Map -->
+                    
+                    <!-- Live Multi-Hazard Map -->
                     <div class="bg-white rounded-2xl shadow-card overflow-hidden border border-gray-100">
                         <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50/50 gap-3">
-                            <h3 class="font-bold text-gray-800"><i class="fas fa-map-marked-alt text-blue-600 mr-2"></i> ระบบแผนที่แจ้งภัย (Live Map)</h3>
+                            <h3 class="font-bold text-gray-800"><i class="fas fa-satellite-dish text-blue-600 mr-2"></i> ระบบแผนที่แจ้งภัย (Live Map)</h3>
                             <div class="flex gap-2 w-full sm:w-auto">
-                                <button id="btn-report" onclick="toggleReportMode()" class="flex-1 sm:flex-none justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 shadow-sm border border-gray-200">
+                                <button id="btn-report" onclick="toggleReportMode()" class="flex-1 sm:flex-none justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-gray-200">
                                     <i class="fas fa-traffic-cone"></i> สิ่งกีดขวาง
                                 </button>
-                                <button id="btn-sos" onclick="toggleSosMode()" class="flex-1 sm:flex-none justify-center bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 shadow-sm border border-red-200">
+                                <button id="btn-sos" onclick="toggleSosMode()" class="flex-1 sm:flex-none justify-center bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-red-200">
                                     <i class="fas fa-life-ring"></i> แจ้งพิกัด SOS
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- Map Notification Toast -->
-                        <div id="map-toast" class="hidden text-white text-sm text-center py-2.5 font-bold animate-pulse shadow-inner">
-                            <span id="map-toast-msg"></span>
-                        </div>
-
-                        <!-- Interactive Map Container -->
+                        <div id="map-toast" class="hidden text-white text-sm text-center py-2.5 font-bold animate-pulse shadow-inner"><span id="map-toast-msg"></span></div>
                         <div id="map" class="h-72 w-full z-10 border-b border-gray-100 relative bg-gray-200 cursor-default"></div>
 
-                        <!-- Navigation Buttons -->
+                        <!-- General Safe Zones -->
                         <div class="p-4 bg-white space-y-3">
-                            <div class="flex items-start gap-4 mb-2">
-                                <i class="fas fa-info-circle text-blue-500 mt-1"></i>
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    <strong>จุดอพยพหลัก:</strong> หากอพยพด้วยตนเองได้ ให้กดปุ่ม "นำทาง" เพื่อเปิด Google Maps ไปยังจุดปลอดภัยทันที (ระบบจะคำนวณเส้นทางที่ปลอดภัยจากระดับน้ำทะเลให้)
-                                </p>
-                            </div>
+                            <p class="text-sm text-gray-600 mb-2"><i class="fas fa-info-circle text-blue-500 mr-1"></i> <strong>การอพยพด่วน:</strong> กดนำทางเพื่อไปยังศูนย์พักพิงที่ใกล้ที่สุด (ระบบจะประเมินเส้นทางตามประเภทภัยพิบัติปัจจุบัน)</p>
                             
-                            <!-- Card 1: Hospital -->
-                            <div class="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100 hover:bg-blue-100 transition">
-                                 <div class="flex items-center gap-3">
-                                     <div class="bg-blue-600 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center shadow-sm"><i class="fas fa-hospital"></i></div>
-                                     <div>
-                                         <p class="font-bold text-blue-900 text-sm">โรงพยาบาลป่าตอง</p>
-                                         <p class="text-xs text-blue-700">จุดปลอดภัย / รักษาพยาบาลฉุกเฉิน</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <a href="https://maps.google.com" target="_blank" class="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100 hover:bg-blue-100 transition">
+                                     <div class="flex items-center gap-3">
+                                         <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-hospital text-sm"></i></div>
+                                         <div><p class="font-bold text-blue-900 text-sm">โรงพยาบาลส่วนภูมิภาค</p><p class="text-[10px] text-blue-700">รักษาพยาบาลฉุกเฉิน</p></div>
                                      </div>
-                                 </div>
-                                 <a href="https://www.google.com/maps/dir/?api=1&destination=Patong+Hospital&destination_place_id=ChIJeXJ0SKI6UDAR65xhAW-b_-A" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-full shadow-md transition flex items-center">
-                                     <i class="fas fa-location-arrow mr-2"></i> นำทาง
-                                 </a>
-                            </div>
-
-                            <!-- Card 2: Temple (High Ground) -->
-                            <div class="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-100 hover:bg-green-100 transition">
-                                 <div class="flex items-center gap-3">
-                                     <div class="bg-green-600 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center shadow-sm"><i class="fas fa-mountain"></i></div>
-                                     <div>
-                                         <p class="font-bold text-green-900 text-sm">วัดสุวรรณคีรีวงก์</p>
-                                         <p class="text-xs text-green-700">พื้นที่สูง / ศูนย์อพยพหลัก (Safe Zone)</p>
+                                </a>
+                                <a href="https://maps.google.com" target="_blank" class="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-100 hover:bg-green-100 transition">
+                                     <div class="flex items-center gap-3">
+                                         <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-campground text-sm"></i></div>
+                                         <div><p class="font-bold text-green-900 text-sm">ศูนย์อพยพประจำอำเภอ</p><p class="text-[10px] text-green-700">พื้นที่ปลอดภัย (Safe Zone)</p></div>
                                      </div>
-                                 </div>
-                                 <a href="https://www.google.com/maps/dir/?api=1&destination=Wat+Suwan+Khiri+Wong&destination_place_id=ChIJ9XSzgbw6UDARGAfneb5s7kw" target="_blank" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded-full shadow-md transition flex items-center">
-                                     <i class="fas fa-location-arrow mr-2"></i> นำทาง
-                                 </a>
-                            </div>
-
-                            <!-- Card 3: Municipality (EOC) -->
-                            <div class="flex items-center justify-between bg-orange-50 p-3 rounded-lg border border-orange-100 hover:bg-orange-100 transition">
-                                 <div class="flex items-center gap-3">
-                                     <div class="bg-orange-500 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center shadow-sm"><i class="fas fa-building"></i></div>
-                                     <div>
-                                         <p class="font-bold text-orange-900 text-sm">เทศบาลเมืองป่าตอง</p>
-                                         <p class="text-xs text-orange-700">ศูนย์บัญชาการเหตุการณ์ (EOC)</p>
-                                     </div>
-                                 </div>
-                                 <a href="https://www.google.com/maps/dir/?api=1&destination=Patong+Municipality&destination_place_id=ChIJZ-PNY586UDARRE6Pfy3Jc8E" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-md transition flex items-center">
-                                     <i class="fas fa-location-arrow mr-2"></i> นำทาง
-                                 </a>
+                                </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Warning Signs & Procedures -->
+                    <!-- All-Hazards SOPs (Grid) -->
                     <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
-                        <h3 class="font-bold text-gray-900 text-lg mb-4"><i class="fas fa-clipboard-list text-moph-primary mr-2"></i> ขั้นตอนการปฏิบัติเมื่อเกิดสึนามิ (SOPs)</h3>
+                        <h3 class="font-bold text-gray-900 text-lg mb-4"><i class="fas fa-book-open text-moph-primary mr-2"></i> คู่มือปฏิบัติการเอาชีวิตรอด 4 ภัยหลัก</h3>
                         
-                        <div class="space-y-4">
-                            <!-- Step 1 -->
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">1</div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800">สังเกตสัญญาณเตือนทางธรรมชาติ</h4>
-                                    <p class="text-sm text-gray-600 mt-1">หากรู้สึกถึงแผ่นดินไหวรุนแรงจนยืนไม่ได้ หรือเห็น <strong>"น้ำทะเลลดระดับลงฉับพลัน"</strong> จนเห็นพื้นทราย ห้ามลงไปจับปลาเด็ดขาด นี่คือสัญญาณเตือนภัยสูงสุด ให้อพยพขึ้นที่สูงทันทีโดยไม่ต้องรอเสียงไซเรน</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- ภัยน้ำท่วม -->
+                            <div class="border border-blue-200 rounded-xl p-4 hover:shadow-md transition bg-blue-50/30 group cursor-pointer" onclick="openModal('รับมือน้ำท่วม/ดินถล่ม', '1. ตัดไฟสับคัตเอาต์ทันที\n2. อพยพขึ้นที่สูง\n3. ห้ามเดินลุยน้ำเชี่ยวเด็ดขาด (น้ำลึก 15 ซม. ทำให้เสียหลักได้)\n4. เตรียมกระเป๋าฉุกเฉินให้พร้อม', 'fa-water', 'text-blue-500', 'bg-blue-100')">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-cloud-showers-heavy"></i></div>
+                                    <h4 class="font-bold text-gray-800 group-hover:text-blue-700">น้ำท่วม & ดินถล่ม</h4>
                                 </div>
+                                <p class="text-xs text-gray-500">วิธีย้ายของขึ้นที่สูง การตัดไฟ และระวังโรคฉี่หนู <br><span class="text-blue-500 underline mt-1 inline-block">อ่านข้อปฏิบัติ &rarr;</span></p>
                             </div>
-                            <!-- Step 2 -->
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">2</div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800">เมื่อได้ยินหอเตือนภัย (5 ภาษา)</h4>
-                                    <p class="text-sm text-gray-600 mt-1">ระบบเตือนภัยจะประกาศเป็นภาษา ไทย, อังกฤษ, จีน, ญี่ปุ่น และมลายู ให้ทิ้งสัมภาระที่ไม่จำเป็น คว้า <strong>"กระเป๋าฉุกเฉิน"</strong> แล้ววิ่งไปตามป้ายอพยพ (เส้นทางสีน้ำเงิน) สู่พื้นที่ปลอดภัย (Safe Zone) ที่กำหนด</p>
+                            
+                            <!-- แผ่นดินไหว/สึนามิ -->
+                            <div class="border border-orange-200 rounded-xl p-4 hover:shadow-md transition bg-orange-50/30 group cursor-pointer" onclick="openModal('รับมือแผ่นดินไหว/สึนามิ', '1. หมอบ บัง ยึดเกาะ (Drop, Cover, Hold on) ใต้โต๊ะแข็งแรง\n2. เมื่อแผ่นดินไหวหยุด ให้อพยพออกจากตึก ห้ามใช้ลิฟต์\n3. หากอยู่ชายหาดและรู้สึกถึงแผ่นดินไหว ให้อพยพขึ้นที่สูงทันทีโดยไม่ต้องรอไซเรน', 'fa-house-damage', 'text-orange-500', 'bg-orange-100')">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="bg-orange-100 text-orange-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-house-damage"></i></div>
+                                    <h4 class="font-bold text-gray-800 group-hover:text-orange-700">แผ่นดินไหว & สึนามิ</h4>
                                 </div>
+                                <p class="text-xs text-gray-500">หลัก Drop, Cover, Hold on และการหนีคลื่นยักษ์ <br><span class="text-orange-500 underline mt-1 inline-block">อ่านข้อปฏิบัติ &rarr;</span></p>
                             </div>
-                            <!-- Step 3 -->
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold">3</div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800">การปฏิบัติตัวในศูนย์พักพิง</h4>
-                                    <p class="text-sm text-gray-600 mt-1">เมื่อถึงจุดปลอดภัย ห้ามกลับลงไปที่ชายหาดจนกว่าจะมีการประกาศ <strong>"ยกเลิกสถานการณ์ฉุกเฉิน (All Clear)"</strong> จากทางการ เนื่องจากสึนามิอาจมาหลายระลอก และระลอกหลังอาจใหญ่กว่าระลอกแรก</p>
+
+                            <!-- อัคคีภัย/สารเคมี -->
+                            <div class="border border-red-200 rounded-xl p-4 hover:shadow-md transition bg-red-50/30 group cursor-pointer" onclick="openModal('รับมืออัคคีภัย/สารเคมี', '1. ใช้ผ้าชุบน้ำปิดจมูก ก้มต่ำคลานหนีควันไฟ\n2. หากไฟไหม้เสื้อผ้า ให้ หยุด ล้ม กลิ้ง (Stop, Drop, Roll)\n3. กรณีสารเคมีรั่ว ให้อพยพเหนือลม และใส่หน้ากาก N95 ทันที', 'fa-fire', 'text-red-500', 'bg-red-100')">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="bg-red-100 text-red-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-fire-extinguisher"></i></div>
+                                    <h4 class="font-bold text-gray-800 group-hover:text-red-700">อัคคีภัย & สารเคมี</h4>
                                 </div>
+                                <p class="text-xs text-gray-500">การหมอบคลานหนีควัน การอพยพเหนือลมทิศทางสารเคมี <br><span class="text-red-500 underline mt-1 inline-block">อ่านข้อปฏิบัติ &rarr;</span></p>
+                            </div>
+
+                            <!-- โรคระบาด -->
+                            <div class="border border-green-200 rounded-xl p-4 hover:shadow-md transition bg-green-50/30 group cursor-pointer" onclick="openModal('รับมือโรคระบาดฉุกเฉิน', '1. สวมหน้ากากอนามัยตลอดเวลาในศูนย์พักพิง\n2. ล้างมือด้วยสบู่หรือเจลแอลกอฮอล์บ่อยๆ\n3. หากมีไข้ ไอ หรือท้องเสีย ให้แจ้งเจ้าหน้าที่สาธารณสุข (SRRT) เพื่อแยกกักตัวทันที', 'fa-virus', 'text-green-500', 'bg-green-100')">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="bg-green-100 text-green-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-viruses"></i></div>
+                                    <h4 class="font-bold text-gray-800 group-hover:text-green-700">โรคระบาดอุบัติใหม่</h4>
+                                </div>
+                                <p class="text-xs text-gray-500">การกักตัวในศูนย์พักพิง และเฝ้าระวังโรคติดต่อ (One Health) <br><span class="text-green-500 underline mt-1 inline-block">อ่านข้อปฏิบัติ &rarr;</span></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Interactive Checklist -->
+                <!-- Right Column: Universal Checklist -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden sticky top-24">
                         <div class="bg-moph-dark p-5 text-white">
-                            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-medkit text-moph-secondary"></i> ชุดอุปกรณ์ฉุกเฉิน (72 ชม.)</h3>
-                            <p class="text-xs text-green-200 mt-1 opacity-90">เตรียมพร้อมก่อนเกิดภัย บันทึกข้อมูลบนเบราว์เซอร์</p>
+                            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-backpack text-moph-secondary"></i> กระเป๋าฉุกเฉินครอบจักรวาล</h3>
+                            <p class="text-xs text-green-200 mt-1 opacity-90">Grab & Go Bag สำหรับ 72 ชั่วโมง (ระบบจำข้อมูล)</p>
                         </div>
                         <div class="p-5 space-y-4 max-h-[400px] overflow-y-auto" id="checklist-container">
-                            <!-- Checkboxes -->
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-med" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-med" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">ยาสามัญ / ยาประจำตัว</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">ยาสามัญ / ยาประจำตัว</span>
                                     <span class="block text-xs text-gray-500">ยาโรคประจำตัวสำหรับ 7 วัน และใบสั่งยา</span>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-firstaid" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-firstaid" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">ชุดปฐมพยาบาลเบื้องต้น</span>
-                                    <span class="block text-xs text-gray-500">พลาสเตอร์, แอลกอฮอล์, ผ้าพันแผล, ยาใส่แผล</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">ชุดปฐมพยาบาลเบื้องต้น</span>
+                                    <span class="block text-xs text-gray-500">พลาสเตอร์, แอลกอฮอล์, ยาใส่แผล</span>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-mask" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-mask" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">หน้ากากอนามัย & เจลล้างมือ</span>
-                                    <span class="block text-xs text-gray-500">ป้องกันโรคระบาดทางเดินหายใจในศูนย์พักพิง</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">หน้ากาก N95 & เจลล้างมือ</span>
+                                    <span class="block text-xs text-gray-500">ป้องกันสารเคมี ฝุ่น PM2.5 และโรคระบาด</span>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-whistle" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-whistle" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">นกหวีด และ ไฟฉาย</span>
-                                    <span class="block text-xs text-gray-500">พร้อมถ่านสำรอง สำหรับขอความช่วยเหลือยามวิกาล</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">นกหวีด และ ไฟฉาย</span>
+                                    <span class="block text-xs text-gray-500">สำหรับขอความช่วยเหลือเมื่อติดใต้ซาก/ไฟดับ</span>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-doc" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-doc" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">เอกสารสำคัญ (ซีลกันน้ำ)</span>
-                                    <span class="block text-xs text-gray-500">บัตร ปชช., พาสปอร์ต, ทะเบียนบ้าน, สมุดบัญชี</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">เอกสารสำคัญ (ซีลกันน้ำ)</span>
+                                    <span class="block text-xs text-gray-500">บัตร ปชช., พาสปอร์ต, ทะเบียนบ้าน, ประกัน</span>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-water" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-water" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">น้ำดื่มและอาหารแห้ง</span>
-                                    <span class="block text-xs text-gray-500">สำหรับบริโภคอย่างน้อย 3 วัน (อาหารให้พลังงานสูง)</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">น้ำดื่มและอาหารแห้ง</span>
+                                    <span class="block text-xs text-gray-500">สำหรับบริโภคอย่างน้อย 3 วัน</span>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-power" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 text-moph-primary focus:ring-moph-primary transition" onchange="saveChecklist()">
+                                <input type="checkbox" id="chk-power" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
                                 <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 group-hover:text-moph-primary transition chk-label">วิทยุ FM & พาวเวอร์แบงค์</span>
-                                    <span class="block text-xs text-gray-500">เพื่อติดตามข่าวสารกรณีเครือข่ายมือถือล่ม</span>
+                                    <span class="block text-sm font-semibold text-gray-800 chk-label">วิทยุ FM & พาวเวอร์แบงค์</span>
+                                    <span class="block text-xs text-gray-500">ติดตามข่าวสารกรณีเครือข่ายมือถือ/เน็ตล่ม</span>
                                 </div>
                             </label>
                         </div>
@@ -400,101 +396,77 @@
                     <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-brain text-purple-600 text-2xl"></i></div>
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">การปฐมพยาบาลทางใจ (Psychological First Aid - PFA)</h3>
-                        <p class="text-sm text-gray-500">แนวทางการดูแลจิตใจผู้ประสบภัยในช่วง 72 ชั่วโมงแรกหลังเกิดเหตุ</p>
+                        <p class="text-sm text-gray-500">แนวทางการดูแลจิตใจผู้ประสบภัยในช่วง 72 ชั่วโมงแรกหลังเกิดเหตุวิกฤตทุกประเภท</p>
                     </div>
                 </div>
                 
                 <p class="text-gray-700 text-sm mb-6 leading-relaxed border-l-4 border-purple-500 pl-4 bg-purple-50 p-3 rounded-r-lg">
-                    ในสถานการณ์สึนามิ การสูญเสียเกิดขึ้นอย่างฉับพลัน ประชาชนและอาสาสมัครสามารถช่วยเหลือกันเบื้องต้นได้ด้วยหลักการ <strong>3L (มอง ฟัง ส่งต่อ)</strong> เพื่อลดความตื่นตระหนกและป้องกันภาวะ PTSD
+                    ภัยพิบัติสร้างความสูญเสียฉับพลัน ประชาชนและอาสาสมัครสามารถช่วยกันได้เบื้องต้นด้วยหลักการ <strong>3L (มอง ฟัง ส่งต่อ)</strong> เพื่อลดความตื่นตระหนกและป้องกันภาวะ PTSD (บาดแผลทางใจ)
                 </p>
                 
-                <!-- 3L Principles -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- L1 -->
                     <div class="relative bg-white border border-purple-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow group">
                         <div class="absolute -top-4 left-6 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md">1</div>
                         <i class="fas fa-eye text-3xl text-purple-300 group-hover:text-purple-500 transition-colors mb-4 mt-2"></i>
                         <h4 class="font-bold text-gray-900 text-lg mb-2">Look (มอง)</h4>
                         <ul class="text-sm text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                            <li>สำรวจความปลอดภัยของสถานที่ก่อนเข้าไปช่วยเหลือ</li>
-                            <li>มองหาผู้ที่ต้องการความช่วยเหลือเร่งด่วน เช่น ผู้บาดเจ็บทางกาย</li>
-                            <li>สังเกตผู้ที่มีภาวะตื่นตระหนกรุนแรง เหม่อลอย ร้องไห้ฟูมฟาย หรือเด็กที่พลัดหลงกับครอบครัว</li>
+                            <li>สำรวจความปลอดภัยของสถานที่ก่อนเข้าไปช่วย</li>
+                            <li>มองหาผู้ที่ต้องการความช่วยเหลือด่วนทางกาย</li>
+                            <li>สังเกตผู้ที่เหม่อลอย ร้องไห้ฟูมฟาย หรือเด็กที่พลัดหลง</li>
                         </ul>
                     </div>
-                    <!-- L2 -->
                     <div class="relative bg-white border border-purple-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow group">
                         <div class="absolute -top-4 left-6 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md">2</div>
                         <i class="fas fa-ear-listen text-3xl text-purple-300 group-hover:text-purple-500 transition-colors mb-4 mt-2"></i>
                         <h4 class="font-bold text-gray-900 text-lg mb-2">Listen (ฟัง)</h4>
                         <ul class="text-sm text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                            <li>เข้าไปแนะนำตัว ถามความต้องการพื้นฐาน (น้ำ, อาหาร, ที่พัก)</li>
-                            <li>รับฟังอย่างตั้งใจ (Active Listening) ปล่อยให้เขาได้ระบายความรู้สึก</li>
-                            <li>ใช้ภาษากายตอบรับ เช่น พยักหน้า สบตา (หากเหมาะสมกับวัฒนธรรม) โอบกอดหากผู้ประสบภัยอนุญาต</li>
+                            <li>แนะนำตัว ถามความต้องการ (น้ำ, อาหาร, ที่พัก)</li>
+                            <li>รับฟังอย่างตั้งใจ ปล่อยให้เขาระบายความรู้สึก</li>
+                            <li>ใช้ภาษากายตอบรับ เช่น พยักหน้า สบตา โอบกอด(หากเขาอนุญาต)</li>
                         </ul>
                     </div>
-                    <!-- L3 -->
                     <div class="relative bg-white border border-purple-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow group">
                         <div class="absolute -top-4 left-6 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md">3</div>
                         <i class="fas fa-link text-3xl text-purple-300 group-hover:text-purple-500 transition-colors mb-4 mt-2"></i>
                         <h4 class="font-bold text-gray-900 text-lg mb-2">Link (ส่งต่อ)</h4>
                         <ul class="text-sm text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
                             <li>ช่วยติดต่อญาติ หรือศูนย์ข้อมูลคนหาย</li>
-                            <li>เชื่อมโยงบริการทางการแพทย์หรือปัจจัยสี่</li>
-                            <li>หากพบผู้มีความเสี่ยงทำร้ายตัวเอง หรือซึมเศร้ารุนแรง ให้ส่งต่อทีม MCATT (ทีมช่วยเหลือเยียวยาจิตใจ) ทันที</li>
+                            <li>เชื่อมโยงปัจจัยสี่ บริการทางการแพทย์</li>
+                            <li>หากพบผู้เสี่ยงทำร้ายตัวเอง ให้ส่งต่อทีม <strong>MCATT</strong> ทันที</li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Do's and Don'ts & Vulnerable group -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <!-- Do and Don't -->
                     <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
                         <h4 class="font-bold text-gray-800 mb-4 text-center">ข้อควรระวังในการสื่อสาร (Do's & Don'ts)</h4>
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <h5 class="font-bold text-green-700 flex items-center gap-2 mb-2"><i class="fas fa-check-circle"></i> ควรพูด/ทำ</h5>
-                                <ul class="space-y-2 text-gray-600">
-                                    <li>• "มีอะไรให้ช่วยเหลือไหมครับ/คะ"</li>
-                                    <li>• "คุณปลอดภัยแล้วในตอนนี้นะ"</li>
-                                    <li>• นั่งเป็นเพื่อนเงียบๆ หากเขาไม่อยากพูด</li>
-                                </ul>
+                                <h5 class="font-bold text-green-700 mb-2"><i class="fas fa-check-circle"></i> ควรพูด/ทำ</h5>
+                                <ul class="space-y-2 text-gray-600"><li>• "มีอะไรให้ช่วยเหลือไหม"</li><li>• "คุณปลอดภัยแล้วนะ"</li><li>• นั่งเป็นเพื่อนเงียบๆ</li></ul>
                             </div>
                             <div>
-                                <h5 class="font-bold text-red-700 flex items-center gap-2 mb-2"><i class="fas fa-times-circle"></i> ไม่ควรพูด/ทำ</h5>
-                                <ul class="space-y-2 text-gray-600">
-                                    <li>• "อย่าร้องไห้เลย / อย่าคิดมาก"</li>
-                                    <li>• "เดี๋ยวก็ดีขึ้น / ถือว่าฟาดเคราะห์"</li>
-                                    <li>• บังคับให้เล่าเหตุการณ์ซ้ำๆ</li>
-                                </ul>
+                                <h5 class="font-bold text-red-700 mb-2"><i class="fas fa-times-circle"></i> ไม่ควรพูด/ทำ</h5>
+                                <ul class="space-y-2 text-gray-600"><li>• "อย่าร้องไห้/อย่าคิดมาก"</li><li>• "ถือว่าฟาดเคราะห์"</li><li>• บังคับให้เล่าเหตุการณ์</li></ul>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Vulnerable Group: Children -->
                     <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
-                        <h4 class="font-bold text-blue-900 mb-3 flex items-center gap-2"><i class="fas fa-child"></i> กลุ่มเปราะบาง: การดูแลเด็ก</h4>
-                        <p class="text-sm text-blue-800 leading-relaxed mb-2">
-                            เด็กอาจไม่สามารถสื่อสารความหวาดกลัวเป็นคำพูดได้ แต่จะแสดงออกผ่านพฤติกรรม เช่น ถดถอย (ฉี่รดที่นอน, ดูดนิ้ว), ก้าวร้าว, หรือเกาะติดผู้ปกครองแน่น
-                        </p>
+                        <h4 class="font-bold text-blue-900 mb-3 flex items-center gap-2"><i class="fas fa-child"></i> กลุ่มเปราะบาง: การดูแลเด็กและคนชรา</h4>
                         <ul class="text-sm text-blue-800 space-y-1 list-disc pl-4">
-                            <li>ให้เด็กอยู่กับครอบครัวหรือคนคุ้นเคย ห้ามแยกเด็กเด็ดขาด</li>
-                            <li>ตอบคำถามเด็กตามความจริงด้วยภาษาที่เข้าใจง่าย (ไม่หลอกลวง)</li>
-                            <li>จัดหากระดาษ สี หรือของเล่น เพื่อให้เด็กได้ระบายความรู้สึกผ่านศิลปะ (Art Therapy เบื้องต้น)</li>
+                            <li>ให้อยู่กับครอบครัว ห้ามแยกเด็ก/คนแก่ออกมาเด็ดขาด</li>
+                            <li>ตอบคำถามเด็กตามความจริงด้วยภาษาที่เข้าใจง่าย ไม่หลอกลวง</li>
+                            <li>จัดหากระดาษ สี ให้เด็กระบายความรู้สึก (Art Therapy)</li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Call to action -->
                 <div class="bg-gradient-to-r from-purple-800 to-purple-600 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-center justify-between shadow-lg">
                     <div class="mb-4 sm:mb-0 text-center sm:text-left">
-                        <h4 class="font-bold text-lg flex items-center justify-center sm:justify-start gap-2">
-                            <i class="fas fa-phone-volume animate-pulse"></i> สายด่วนสุขภาพจิต กรมสุขภาพจิต
-                        </h4>
-                        <p class="text-purple-200 text-sm mt-1">บริการปรึกษาปัญหาจิตใจ 24 ชั่วโมง โดยผู้เชี่ยวชาญ และเชื่อมต่อทีม MCATT</p>
+                        <h4 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-phone-volume animate-pulse"></i> สายด่วนสุขภาพจิต กรมสุขภาพจิต</h4>
+                        <p class="text-purple-200 text-sm mt-1">ปรึกษาปัญหาจิตใจ 24 ชั่วโมง หรือส่งต่อเคสให้ทีม MCATT</p>
                     </div>
-                    <a href="tel:1323" class="whitespace-nowrap bg-white text-purple-700 font-bold px-8 py-3 rounded-full shadow hover:bg-gray-100 transition-transform transform hover:scale-105 active:scale-95">
-                        โทร 1323
-                    </a>
+                    <a href="tel:1323" class="bg-white text-purple-700 font-bold px-8 py-3 rounded-full shadow hover:bg-gray-100 transition-transform hover:scale-105">โทร 1323</a>
                 </div>
             </div>
         </div>
@@ -502,153 +474,95 @@
         <!-- Tab 3: อนามัยสิ่งแวดล้อม (Environmental Health) -->
         <div id="tab-env" class="tab-content hidden fade-in-up">
             <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border border-gray-100">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="bg-teal-100 p-3 rounded-xl"><i class="fas fa-leaf text-teal-600 text-2xl"></i></div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900">อนามัยสิ่งแวดล้อมหลังภัยพิบัติ (WASH)</h3>
-                        <p class="text-sm text-gray-500">แนวทางการจัดการ น้ำ, สุขาภิบาล, และสุขอนามัย ในศูนย์พักพิงเพื่อป้องกันโรคระบาด</p>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-teal-100 p-3 rounded-xl"><i class="fas fa-leaf text-teal-600 text-2xl"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">อนามัยสิ่งแวดล้อม 3 ระยะ (WASH & Disease Control)</h3>
+                            <p class="text-sm text-gray-500">การเตรียมการก่อนเกิดภัย การจัดการระหว่างเกิดภัย และการฟื้นฟูหลังภัยพิบัติ</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Water & Food -->
-                    <div>
-                        <h4 class="font-bold text-teal-800 text-lg mb-4 flex items-center gap-2 border-b pb-2">
-                            <i class="fas fa-glass-water text-teal-500"></i> การจัดการน้ำดื่มและอาหาร
-                        </h4>
-                        <ul class="space-y-4">
-                            <li class="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 transition">
-                                <i class="fas fa-times-circle text-red-500 mt-0.5"></i>
-                                <div>
-                                    <span class="text-sm text-gray-900 font-bold block mb-1">ห้ามใช้น้ำจากแหล่งธรรมชาติ</span>
-                                    <span class="text-sm text-gray-600">น้ำประปาหรือบ่อน้ำตื้นหลังสึนามิอาจปนเปื้อนสารเคมี ซากสัตว์ หรือน้ำเค็ม ให้ดื่ม <strong>น้ำบรรจุขวดที่ปิดสนิท</strong> เท่านั้น</span>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 transition">
-                                <i class="fas fa-fire text-orange-500 mt-0.5"></i>
-                                <div>
-                                    <span class="text-sm text-gray-900 font-bold block mb-1">กรณีขาดแคลนน้ำขวด</span>
-                                    <span class="text-sm text-gray-600">หากจำเป็นต้องใช้น้ำดิบ ต้องต้มให้เดือดจัดอย่างน้อย 1-3 นาที หรือหยดคลอรีนน้ำ (ตามสัดส่วนของกรมอนามัย) และทิ้งไว้ 30 นาทีก่อนดื่ม</span>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 transition">
-                                <i class="fas fa-utensils text-green-500 mt-0.5"></i>
-                                <div>
-                                    <span class="text-sm text-gray-900 font-bold block mb-1">หลักสุขาภิบาลอาหาร</span>
-                                    <span class="text-sm text-gray-600">กินร้อน ช้อนกลางส่วนตัว ล้างมือ อาหารกล่องบริจาคในศูนย์พักพิง <strong>ต้องมีฉลากระบุเวลาผลิต</strong> และไม่ควรทานหากทิ้งไว้นอกตู้เย็นเกิน 4 ชั่วโมง (เสี่ยงโรคอุจจาระร่วง/อาหารเป็นพิษ)</span>
-                                </div>
-                            </li>
+                <div class="space-y-6">
+                    <!-- ก่อนเกิดภัย -->
+                    <div class="border-l-4 border-teal-300 bg-teal-50/30 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-teal-800 text-lg mb-3 flex items-center gap-2"><i class="fas fa-clipboard-check text-teal-500"></i> ระยะก่อนเกิดภัย (Preparedness)</h4>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> สำรวจและสำรองแหล่งน้ำสะอาดสำหรับอุปโภคบริโภค</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> ตรวจสอบระบบบำบัดน้ำเสียและบ่อดักไขมันไม่ให้อุดตัน</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> เตรียมคลอรีนน้ำ/ผงสารส้ม และปูนขาวให้เพียงพอ</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> กำหนดจุดทิ้งขยะชั่วคราวที่น้ำท่วมไม่ถึงในชุมชน</li>
                         </ul>
                     </div>
 
-                    <!-- Sanitation & Vector Control -->
-                    <div>
-                        <h4 class="font-bold text-teal-800 text-lg mb-4 flex items-center gap-2 border-b pb-2">
-                            <i class="fas fa-toilet text-teal-500"></i> การจัดการส้วม ขยะ และสัตว์นำโรค
-                        </h4>
-                        <ul class="space-y-4">
-                            <li class="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 transition">
-                                <i class="fas fa-restroom text-blue-500 mt-0.5"></i>
-                                <div>
-                                    <span class="text-sm text-gray-900 font-bold block mb-1">การใช้ส้วมในศูนย์อพยพ</span>
-                                    <span class="text-sm text-gray-600">มาตรฐานคือ <strong>ส้วม 1 ห้อง ต่อผู้พักพิง 20 คน</strong> (แยกชาย-หญิง) ห้ามขับถ่ายลงพื้นดินหรือน้ำเด็ดขาด หากส้วมเต็มให้แจ้งเจ้าหน้าที่เพื่อนำรถดูดสิ่งปฏิกูลมาจัดการ</span>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 transition">
-                                <i class="fas fa-trash-alt text-gray-600 mt-0.5"></i>
-                                <div>
-                                    <span class="text-sm text-gray-900 font-bold block mb-1">การคัดแยกขยะติดเชื้อ</span>
-                                    <span class="text-sm text-gray-600">หน้ากากอนามัย, อุปกรณ์ทำแผล, ผ้าอนามัย ต้องแยกทิ้งใน <strong>ถุงขยะสีแดง</strong> หรือมัดปากถุงให้แน่น เขียนป้ายระบุชัดเจน เพื่อให้ทีมสาธารณสุขนำไปกำจัดอย่างถูกวิธี</span>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 transition">
-                                <i class="fas fa-bug text-purple-500 mt-0.5"></i>
-                                <div>
-                                    <span class="text-sm text-gray-900 font-bold block mb-1">ป้องกันสัตว์และแมลงนำโรค</span>
-                                    <span class="text-sm text-gray-600">หลังน้ำท่วม/สึนามิ มักมีปัญหาหนูและแมลงวัน ให้ปิดปากถุงขยะทุกครั้ง กำจัดแหล่งน้ำขังรอบศูนย์พักพิง และระวังการเดินลุยน้ำด้วยเท้าเปล่า (ป้องกันโรคเลปโตสไปโรซิส)</span>
-                                </div>
-                            </li>
+                    <!-- ระหว่างเกิดภัย -->
+                    <div class="border-l-4 border-orange-300 bg-orange-50/30 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-orange-800 text-lg mb-3 flex items-center gap-2"><i class="fas fa-exclamation-triangle text-orange-500"></i> ระยะระหว่างเกิดภัย (Response)</h4>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                            <li class="flex items-start gap-2"><i class="fas fa-biohazard text-red-500 mt-1"></i> <strong>ห้ามใช้น้ำแหล่งธรรมชาติ:</strong> ดื่มน้ำบรรจุขวด หรือต้มเดือด 3 นาที</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-restroom text-blue-500 mt-1"></i> <strong>ส้วมฉุกเฉิน:</strong> ใช้ส้วมกระดาษ/ถุงดำ มัดปากถุงให้แน่นและโรยปูนขาว</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-utensils text-orange-500 mt-1"></i> <strong>สุขาภิบาลอาหาร:</strong> อาหารกล่องต้องมีป้ายบอกเวลา ทิ้งหากเกิน 4 ชม.</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-trash text-gray-500 mt-1"></i> <strong>ขยะติดเชื้อ:</strong> ทิ้งหน้ากากอนามัยในถุงแดง มัดให้แน่นป้องกันแมลงวัน</li>
+                        </ul>
+                    </div>
+
+                    <!-- หลังเกิดภัย -->
+                    <div class="border-l-4 border-blue-300 bg-blue-50/30 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-blue-800 text-lg mb-3 flex items-center gap-2"><i class="fas fa-tools text-blue-500"></i> ระยะหลังเกิดภัย (Recovery & Build Back Better)</h4>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                            <li class="flex items-start gap-2"><i class="fas fa-broom text-blue-500 mt-1"></i> <strong>Big Cleaning:</strong> ล้างทำความสะอาดบ้านเรือน ตลาด และพื้นที่สาธารณะทันทีที่น้ำลด</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-vial text-blue-500 mt-1"></i> <strong>ฟื้นฟูแหล่งน้ำ:</strong> สูบน้ำเสียออกจากบ่อน้ำตื้น ล้างบ่อ และเติมคลอรีนให้ได้ระดับ 0.5-1.0 ppm</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-bug text-purple-500 mt-1"></i> <strong>ควบคุมพาหะ:</strong> กำจัดแหล่งเพาะพันธุ์ยุงลาย พ่นหมอกควัน และวางเหยื่อกำจัดหนู</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-shield-alt text-green-500 mt-1"></i> <strong>เฝ้าระวังโรค:</strong> ติดตามผู้ป่วยโรคฉี่หนู อาหารเป็นพิษ และโรคตาแดงอย่างต่อเนื่อง</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-
     </main>
 
-    <!-- Floating Action Button (Emergency Call) -->
     <a href="tel:1669" class="fixed bottom-6 right-6 w-16 h-16 bg-red-600 text-white rounded-full flex flex-col items-center justify-center shadow-lg hover:bg-red-700 hover:scale-105 transition-all z-40 ring-4 ring-red-200">
-        <i class="fas fa-phone-alt text-xl mb-0.5"></i>
-        <span class="text-xs font-bold leading-none">1669</span>
+        <i class="fas fa-phone-alt text-xl mb-0.5"></i><span class="text-xs font-bold leading-none">1669</span>
     </a>
 
-    <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+        <div class="max-w-5xl mx-auto px-4 py-6 flex justify-between items-center text-center md:text-left text-xs md:text-sm">
             <div>
-                <p class="text-sm font-bold text-gray-700">เว็บไซต์ต้นแบบเชิงวิชาการ (Academic Prototype)</p>
-                <p class="text-xs text-gray-500 mt-1">รายวิชา สธ 287 การเตรียมความพร้อมและการตอบโต้ภัยพิบัติ (PB287) | ระบบแผนที่จาก OpenStreetMap</p>
+                <p class="font-bold text-gray-700">เว็บไซต์ต้นแบบ (Academic Prototype)</p>
+                <p class="text-gray-500">รายวิชา สธ 287 (PB287) | ครอบคลุมบูรณาการ 3 สัปดาห์+</p>
             </div>
-            <div class="flex gap-4">
-                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">CLO 3 & 4</span>
-                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">Mockup UI</span>
-            </div>
+            <div class="flex gap-2"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded">CLO 3 & 4</span></div>
         </div>
     </footer>
 
     <script>
-        // --- 1. Tab Navigation Logic ---
+        // --- Tab Navigation ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('tab-active');
-                el.classList.add('tab-inactive');
-            });
-
+            document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('tab-active'); el.classList.add('tab-inactive'); });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.remove('tab-inactive');
-            activeBtn.classList.add('tab-active');
-            
-            if(tabId === 'risk' && map) {
-                setTimeout(() => { map.invalidateSize(); }, 100);
-            }
+            activeBtn.classList.remove('tab-inactive'); activeBtn.classList.add('tab-active');
+            if(tabId === 'risk' && map) setTimeout(() => { map.invalidateSize(); }, 100);
         }
 
-        // --- 2. Map, Reporting & SOS System ---
-        let map;
-        let isReportingMode = false;
-        let isSosMode = false;
-        let tempSosLatLng = null;
+        // --- Map System ---
+        let map, isReportingMode = false, isSosMode = false, tempSosLatLng = null;
 
         function initMap() {
-            map = L.map('map').setView([7.8965, 98.2970], 14);
+            // ศูนย์กลางแผนที่ (ตั้งเป็น กทม. ให้เป็นกลางๆ สำหรับ Multi-hazard)
+            map = L.map('map').setView([13.7563, 100.5018], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OS' }).addTo(map);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            const safeIcon = L.divIcon({
-                className: 'custom-icon',
-                html: '<div class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg border-2 border-white"><i class="fas fa-hospital"></i></div>',
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            });
-
-            L.marker([7.8990, 98.3050], {icon: safeIcon}).addTo(map)
-                .bindPopup('<b>โรงพยาบาลป่าตอง</b><br>จุดปลอดภัย');
-
-            // โหลดข้อมูลเก่าที่เคยปักไว้
+            // โหลดข้อมูลเก่า
             loadMapData();
 
-            // อีเวนต์คลิกบนแผนที่
             map.on('click', function(e) {
                 if (isReportingMode) {
                     addMapPin('obstacle', e.latlng.lat, e.latlng.lng, null);
                     toggleReportMode(); 
-                    openModal('รับแจ้งเหตุสำเร็จ', 'บันทึกจุดสิ่งกีดขวางแล้ว ข้อมูลนี้ส่งไปที่ศูนย์ EOC ทันที', 'fa-check-circle', 'text-green-500', 'bg-green-50');
+                    openModal('รับแจ้งเหตุสำเร็จ', 'บันทึกจุดสิ่งกีดขวาง/เส้นทางขาดแล้ว ข้อมูลส่งไป EOC ทันที', 'fa-check-circle', 'text-green-500', 'bg-green-50');
                 } else if (isSosMode) {
                     tempSosLatLng = e.latlng;
                     document.getElementById('sosModal').classList.remove('hidden');
@@ -656,191 +570,264 @@
             });
         }
 
-        // ควบคุมโหมดแผนที่
         function toggleReportMode() {
-            if (isSosMode) toggleSosMode(); // ปิดโหมด SOS ก่อนถ้าเปิดอยู่
-            
+            if (isSosMode) toggleSosMode(); 
             isReportingMode = !isReportingMode;
             const btn = document.getElementById('btn-report');
-            
             if (isReportingMode) {
-                btn.classList.replace('bg-gray-100', 'bg-gray-800');
-                btn.classList.replace('text-gray-700', 'text-white');
+                btn.classList.replace('bg-gray-100', 'bg-gray-800'); btn.classList.replace('text-gray-700', 'text-white');
                 btn.innerHTML = '<i class="fas fa-times"></i> ยกเลิก';
                 showMapToast('<i class="fas fa-traffic-cone mr-2"></i> โหมดแจ้งสิ่งกีดขวาง: คลิกลงบนแผนที่เพื่อระบุจุด', 'bg-gray-800');
                 document.getElementById('map').classList.add('cursor-crosshair');
             } else {
-                btn.classList.replace('bg-gray-800', 'bg-gray-100');
-                btn.classList.replace('text-white', 'text-gray-700');
+                btn.classList.replace('bg-gray-800', 'bg-gray-100'); btn.classList.replace('text-white', 'text-gray-700');
                 btn.innerHTML = '<i class="fas fa-traffic-cone"></i> สิ่งกีดขวาง';
-                hideMapToast();
-                document.getElementById('map').classList.remove('cursor-crosshair');
+                hideMapToast(); document.getElementById('map').classList.remove('cursor-crosshair');
             }
         }
 
         function toggleSosMode() {
-            if (isReportingMode) toggleReportMode(); // ปิดโหมดสิ่งกีดขวางก่อนถ้าเปิดอยู่
-            
+            if (isReportingMode) toggleReportMode(); 
             isSosMode = !isSosMode;
             const btn = document.getElementById('btn-sos');
-            
             if (isSosMode) {
-                btn.classList.replace('bg-red-100', 'bg-red-600');
-                btn.classList.replace('text-red-700', 'text-white');
+                btn.classList.replace('bg-red-100', 'bg-red-600'); btn.classList.replace('text-red-700', 'text-white');
                 btn.innerHTML = '<i class="fas fa-times"></i> ยกเลิก SOS';
                 showMapToast('<i class="fas fa-life-ring mr-2"></i> โหมดขอความช่วยเหลือ (SOS): คลิกเลือกตำแหน่งของท่านบนแผนที่', 'bg-red-600');
                 document.getElementById('map').classList.add('cursor-crosshair');
             } else {
-                btn.classList.replace('bg-red-600', 'bg-red-100');
-                btn.classList.replace('text-white', 'text-red-700');
+                btn.classList.replace('bg-red-600', 'bg-red-100'); btn.classList.replace('text-white', 'text-red-700');
                 btn.innerHTML = '<i class="fas fa-life-ring"></i> แจ้งพิกัด SOS';
-                hideMapToast();
-                document.getElementById('map').classList.remove('cursor-crosshair');
+                hideMapToast(); document.getElementById('map').classList.remove('cursor-crosshair');
             }
         }
 
-        // จัดการ Toast บนแผนที่
         function showMapToast(msg, bgClass) {
             const toast = document.getElementById('map-toast');
             toast.className = `text-white text-sm text-center py-2.5 font-bold animate-pulse shadow-inner ${bgClass}`;
-            document.getElementById('map-toast-msg').innerHTML = msg;
-            toast.classList.remove('hidden');
+            document.getElementById('map-toast-msg').innerHTML = msg; toast.classList.remove('hidden');
         }
-        function hideMapToast() {
-            document.getElementById('map-toast').classList.add('hidden');
-        }
+        function hideMapToast() { document.getElementById('map-toast').classList.add('hidden'); }
 
-        // จัดการการส่ง SOS Modal
-        function cancelSos() {
-            tempSosLatLng = null;
-            document.getElementById('sosModal').classList.add('hidden');
-            toggleSosMode(); // ปิดโหมด SOS คืนสภาพเดิม
-        }
+        function cancelSos() { tempSosLatLng = null; document.getElementById('sosModal').classList.add('hidden'); toggleSosMode(); }
 
         function submitSos(level) {
             if (tempSosLatLng) {
                 addMapPin('sos', tempSosLatLng.lat, tempSosLatLng.lng, level);
                 document.getElementById('sosModal').classList.add('hidden');
                 toggleSosMode(); 
-                openModal('ส่งสัญญาณ SOS สำเร็จ', 'EOC ได้รับพิกัดและระดับความรุนแรงของท่านแล้ว กรุณารอการติดต่อกลับและสงวนแบตเตอรี่โทรศัพท์ไว้', 'fa-broadcast-tower', 'text-green-500', 'bg-green-50');
+                openModal('ส่งสัญญาณ SOS สำเร็จ', 'EOC ได้รับพิกัดและระดับความรุนแรงแล้ว กรุณาสงวนแบตเตอรี่โทรศัพท์ไว้', 'fa-broadcast-tower', 'text-green-500', 'bg-green-50');
             }
         }
 
-        // Core ฟังก์ชันปักหมุด
         function addMapPin(type, lat, lng, level = null) {
             let html, popupText;
-            
             if (type === 'obstacle') {
                 html = '<div class="bg-gray-800 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md border-2 border-white"><i class="fas fa-times text-[10px]"></i></div>';
-                popupText = '<b><i class="fas fa-traffic-cone text-gray-700"></i> สิ่งกีดขวาง</b><br>แจ้งโดยประชาชน';
+                popupText = '<b><i class="fas fa-traffic-cone"></i> สิ่งกีดขวาง/เส้นทางขาด</b><br>อัปเดตจากประชาชน';
             } else if (type === 'sos') {
-                let bgClass = 'bg-red-600';
-                let levelText = 'วิกฤต (Red)';
+                let bgClass = 'bg-red-600', levelText = 'วิกฤต (Red)';
                 if(level === 'yellow') { bgClass = 'bg-yellow-500'; levelText = 'เร่งด่วน (Yellow)'; }
                 if(level === 'green') { bgClass = 'bg-green-500'; levelText = 'รอได้ (Green)'; }
-                
                 html = `<div class="${bgClass} text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white sos-icon-${level}"><i class="fas fa-hand-paper text-xs"></i></div>`;
-                popupText = `<b><i class="fas fa-life-ring text-red-500"></i> SOS ขอความช่วยเหลือ</b><br>ระดับความรุนแรง: ${levelText}`;
+                popupText = `<b><i class="fas fa-life-ring"></i> SOS ขอความช่วยเหลือ</b><br>ระดับ: ${levelText}`;
             }
-
             const icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [32, 32], iconAnchor: [16, 16] });
             L.marker([lat, lng], {icon: icon}).addTo(map).bindPopup(popupText);
-            
-            // บันทึกลง LocalStorage
             saveMapData(type, lat, lng, level);
         }
 
         function saveMapData(type, lat, lng, level) {
-            let dataList = JSON.parse(localStorage.getItem(`moph_${type}s`)) || [];
-            // เช็คไม่ให้บันทึกซ้ำซ้อนตอนโหลดขึ้นมาใหม่
-            const isExist = dataList.some(item => item.lat === lat && item.lng === lng);
-            if (!isExist) {
-                dataList.push({ lat, lng, level });
-                localStorage.setItem(`moph_${type}s`, JSON.stringify(dataList));
+            let dataList = JSON.parse(localStorage.getItem(`all_hazard_${type}s`)) || [];
+            if (!dataList.some(item => item.lat === lat && item.lng === lng)) {
+                dataList.push({ lat, lng, level }); localStorage.setItem(`all_hazard_${type}s`, JSON.stringify(dataList));
             }
         }
 
         function loadMapData() {
-            let obstacles = JSON.parse(localStorage.getItem('moph_obstacles')) || [];
-            obstacles.forEach(obs => addMapPin('obstacle', obs.lat, obs.lng, null));
-            
-            let sosList = JSON.parse(localStorage.getItem('moph_soss')) || [];
-            sosList.forEach(sos => addMapPin('sos', sos.lat, sos.lng, sos.level));
+            (JSON.parse(localStorage.getItem('all_hazard_obstacles')) || []).forEach(o => addMapPin('obstacle', o.lat, o.lng, null));
+            (JSON.parse(localStorage.getItem('all_hazard_soss')) || []).forEach(s => addMapPin('sos', s.lat, s.lng, s.level));
         }
 
-
-        // --- 3. Checklist & LocalStorage Logic ---
+        // --- Checklist ---
         const checklistIds = ['chk-med', 'chk-firstaid', 'chk-mask', 'chk-whistle', 'chk-doc', 'chk-water', 'chk-power'];
-        
         function initChecklist() {
-            let checkedCount = 0;
+            let count = 0;
             checklistIds.forEach(id => {
-                const cb = document.getElementById(id);
-                const isChecked = localStorage.getItem(id) === 'true';
-                cb.checked = isChecked;
-                updateLabelStyle(cb);
-                if(isChecked) checkedCount++;
-            });
-            updateProgress(checkedCount);
+                const cb = document.getElementById(id); cb.checked = localStorage.getItem('ah_'+id) === 'true';
+                updateLabelStyle(cb); if(cb.checked) count++;
+            }); updateProgress(count);
         }
-
         function saveChecklist() {
-            let checkedCount = 0;
+            let count = 0;
             checklistIds.forEach(id => {
-                const cb = document.getElementById(id);
-                localStorage.setItem(id, cb.checked);
-                updateLabelStyle(cb);
-                if(cb.checked) checkedCount++;
-            });
-            updateProgress(checkedCount);
+                const cb = document.getElementById(id); localStorage.setItem('ah_'+id, cb.checked);
+                updateLabelStyle(cb); if(cb.checked) count++;
+            }); updateProgress(count);
         }
-
-        function updateLabelStyle(checkbox) {
-            const label = checkbox.nextElementSibling.querySelector('.chk-label');
-            if (checkbox.checked) {
-                label.classList.add('line-through', 'text-gray-400');
-                label.classList.remove('text-gray-800');
-            } else {
-                label.classList.remove('line-through', 'text-gray-400');
-                label.classList.add('text-gray-800');
-            }
+        function updateLabelStyle(cb) {
+            const label = cb.nextElementSibling.querySelector('.chk-label');
+            if (cb.checked) { label.classList.add('line-through', 'text-gray-400'); label.classList.remove('text-gray-800'); }
+            else { label.classList.remove('line-through', 'text-gray-400'); label.classList.add('text-gray-800'); }
         }
-
-        function updateProgress(count) {
-            const percentage = (count / checklistIds.length) * 100;
-            document.getElementById('progress-bar').style.width = percentage + '%';
-        }
-
+        function updateProgress(count) { document.getElementById('progress-bar').style.width = (count / checklistIds.length * 100) + '%'; }
         function evaluateChecklist() {
             const count = checklistIds.filter(id => document.getElementById(id).checked).length;
-            if (count === checklistIds.length) {
-                openModal('พร้อมรับมือภัยพิบัติ!', 'ยอดเยี่ยม คุณเตรียมอุปกรณ์การแพทย์ฉุกเฉินครบ 100% แล้ว ข้อมูลนี้บูรณาการเนื้อหาการเตรียมความพร้อมก่อนเกิดภัย', 'fa-check-circle', 'text-green-500', 'bg-green-50');
-            } else {
-                openModal('ยังไม่ครบถ้วน', `คุณเตรียมอุปกรณ์ไปแล้ว ${count} จาก ${checklistIds.length} รายการ กรุณาเตรียมให้ครบเพื่อความปลอดภัยสูงสุดของตัวคุณเอง`, 'fa-exclamation-triangle', 'text-yellow-500', 'bg-yellow-50');
-            }
+            if (count === checklistIds.length) openModal('พร้อมรับมือ!', 'คุณเตรียมกระเป๋าฉุกเฉินครบ 100% (Go Bag)', 'fa-check-circle', 'text-green-500', 'bg-green-50');
+            else openModal('ยังไม่ครบถ้วน', `เตรียมอุปกรณ์ไปแล้ว ${count}/${checklistIds.length} รายการ`, 'fa-exclamation-triangle', 'text-yellow-500', 'bg-yellow-50');
         }
 
-        // --- 4. Custom Modal Logic ---
+        // --- Modal ---
         function openModal(title, message, iconClass, iconColor, iconBg) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalMessage').innerText = message;
-            const iconEl = document.getElementById('modalIcon');
-            const iconContainer = document.getElementById('modalIconContainer');
-            
-            iconEl.className = `fas ${iconClass} ${iconColor} text-2xl`;
-            iconContainer.className = `mx-auto flex items-center justify-center h-14 w-14 rounded-full ${iconBg} mb-4`;
+            document.getElementById('modalIcon').className = `fas ${iconClass} ${iconColor} text-2xl`;
+            document.getElementById('modalIconContainer').className = `mx-auto flex items-center justify-center h-14 w-14 rounded-full ${iconBg} mb-4`;
             document.getElementById('customModal').classList.remove('hidden');
         }
+        function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
 
-        function closeModal() {
-            document.getElementById('customModal').classList.add('hidden');
-        }
+        window.addEventListener('DOMContentLoaded', () => { initChecklist(); initMap(); });
+    </script>
 
-        // Initialize on load
-        window.addEventListener('DOMContentLoaded', () => {
-            initChecklist();
-            initMap();
-        });
+    <!-- Firebase SDK & Admin System -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ใช้ Config ของผู้ใช้ที่ให้มา
+        const userConfig = {
+            apiKey: "AIzaSyAaqQ77vaYMeTMecseqEIu2O-wWUOBMz9A",
+            authDomain: "pb287-4fc76.firebaseapp.com",
+            projectId: "pb287-4fc76",
+            storageBucket: "pb287-4fc76.firebasestorage.app",
+            messagingSenderId: "728935756079",
+            appId: "1:728935756079:web:6d49083763e576203271da"
+        };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
+        const appIdStr = typeof __app_id !== 'undefined' ? __app_id : 'pb287_portal';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- ระบบควบคุม UI แอดมิน ---
+        window.openAdminLogin = () => document.getElementById('adminLoginModal').classList.remove('hidden');
+        window.closeAdminLogin = () => { document.getElementById('adminLoginModal').classList.add('hidden'); document.getElementById('adminLoginError').classList.add('hidden'); };
+        
+        window.loginAdmin = () => {
+            const pwd = document.getElementById('adminPwd').value;
+            // ใช้รหัสพาสเวิร์ดจำลองที่เข้าใจง่ายสำหรับพรีเซนต์ (eoc287)
+            if(pwd === 'eoc287') { 
+                closeAdminLogin();
+                document.getElementById('adminDashboardModal').classList.remove('hidden');
+                document.getElementById('adminPwd').value = '';
+            } else {
+                document.getElementById('adminLoginError').classList.remove('hidden');
+            }
+        };
+        window.closeAdminDashboard = () => document.getElementById('adminDashboardModal').classList.add('hidden');
+
+        // --- ระบบฐานข้อมูล Firebase ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth); // เข้าสู่ระบบแบบไม่ระบุตัวตนอัตโนมัติเพื่อให้คนทั่วไปอ่าน Database ได้
+                }
+                listenToAlerts();
+            } catch (error) { console.error("Firebase Auth Error:", error); }
+        };
+
+        const alertsRef = collection(db, 'artifacts', appIdStr, 'public', 'data', 'alerts');
+
+        // ดึงข้อมูลแจ้งเตือนแบบ Real-time
+        const listenToAlerts = () => {
+            if (!auth.currentUser) return;
+            onSnapshot(alertsRef, (snapshot) => {
+                const alerts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // เรียงลำดับจากใหม่ไปเก่าด้วย JavaScript 
+                alerts.sort((a, b) => b.timestamp - a.timestamp);
+                
+                updateTickerUI(alerts);
+                updateAdminListUI(alerts);
+            }, (error) => console.error("Listen Error:", error));
+        };
+
+        // แอดมินเพิ่มประกาศ
+        window.addNewAlert = async () => {
+            if (!auth.currentUser) return;
+            const text = document.getElementById('newAlertText').value;
+            const severity = document.getElementById('newAlertSeverity').value;
+            if(!text) return;
+            
+            const btn = document.querySelector('#adminDashboardModal button.bg-blue-600');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                await addDoc(alertsRef, { text: text, severity: severity, timestamp: Date.now() });
+                document.getElementById('newAlertText').value = '';
+            } catch (e) { console.error(e); }
+            btn.innerHTML = 'ส่งประกาศ';
+        };
+
+        // แอดมินลบประกาศ
+        window.deleteAlert = async (docId) => {
+            if (!auth.currentUser) return;
+            try { await deleteDoc(doc(db, 'artifacts', appIdStr, 'public', 'data', 'alerts', docId)); } 
+            catch (e) { console.error(e); }
+        };
+
+        // อัปเดตแถบวิ่งด้านบนหน้าจอ (ผู้ใช้ทั่วไปเห็น)
+        const updateTickerUI = (alerts) => {
+            const tickerContainer = document.getElementById('live-ticker');
+            if(alerts.length === 0) {
+                tickerContainer.innerHTML = '<span class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full status-dot"></div> สถานการณ์ปกติ ไม่มีประกาศแจ้งเตือนภัยพิบัติในขณะนี้</span>';
+                return;
+            }
+
+            let html = '';
+            alerts.forEach(alert => {
+                let colorClass = 'bg-blue-500';
+                if(alert.severity === 'red') colorClass = 'bg-red-500';
+                if(alert.severity === 'orange') colorClass = 'bg-orange-500';
+                if(alert.severity === 'yellow') colorClass = 'bg-yellow-500';
+                html += `<span class="flex items-center gap-2 mx-12"><div class="w-2 h-2 ${colorClass} rounded-full status-dot"></div> ${alert.text}</span>`;
+            });
+            // ก๊อปปี้ข้อความ 2 รอบเพื่อให้แอนิเมชันแถบวิ่งไม่ขาดตอน
+            tickerContainer.innerHTML = html + html; 
+        };
+
+        // อัปเดตตารางจัดการของแอดมิน
+        const updateAdminListUI = (alerts) => {
+            const listContainer = document.getElementById('adminAlertList');
+            if(alerts.length === 0) {
+                listContainer.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">ไม่มีประกาศที่กำลังใช้งาน</p>';
+                return;
+            }
+
+            let html = '';
+            alerts.forEach(alert => {
+                let colorName = alert.severity === 'red' ? 'แดง (วิกฤต)' : 
+                                alert.severity === 'orange' ? 'ส้ม (เตือนภัย)' : 
+                                alert.severity === 'yellow' ? 'เหลือง (เฝ้าระวัง)' : 'น้ำเงิน (ทั่วไป)';
+                html += `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 mb-2 hover:bg-gray-100 transition">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">${alert.text}</p>
+                            <p class="text-xs text-gray-500 mt-1">ระดับ: <span class="font-semibold">${colorName}</span></p>
+                        </div>
+                        <button onclick="deleteAlert('${alert.id}')" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition" title="ลบประกาศนี้">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+        };
+
+        initAuth();
     </script>
 </body>
 </html>
