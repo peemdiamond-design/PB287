@@ -1,0 +1,131 @@
+rules_version = '2';
+
+// Firestore Security Rules - PB287 All-Hazards Portal
+// Deploy: firebase deploy --only firestore:rules
+// หรือคัดลอกไปวางที่ Firebase Console > Firestore Database > Rules แล้วกด Publish
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // แอดมิน = มีเอกสาร admins/{uid} (เพิ่มด้วยมือผ่าน Firebase Console เท่านั้น)
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function validLatLng(d) {
+      return d.lat is number && d.lng is number
+        && d.lat >= -90 && d.lat <= 90
+        && d.lng >= -180 && d.lng <= 180;
+    }
+
+    function isStr(v, maxLen) {
+      return v is string && v.size() <= maxLen;
+    }
+
+    function isCount(v) {
+      return v is int && v >= 0 && v <= 9999;
+    }
+
+    function ownNew() {
+      return signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.timestamp is number;
+    }
+
+    // ---------- รายชื่อแอดมิน ----------
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /artifacts/{appId}/public/data {
+
+      // ---------- ประกาศแจ้งเตือน: ทุกคนอ่าน / แอดมินเขียน ----------
+      match /alerts/{id} {
+        allow read: if true;
+        allow create: if isAdmin()
+          && request.resource.data.keys().hasOnly(['text', 'severity', 'timestamp'])
+          && isStr(request.resource.data.text, 300) && request.resource.data.text.size() > 0
+          && request.resource.data.severity in ['blue', 'yellow', 'orange', 'red']
+          && request.resource.data.timestamp is number;
+        allow update, delete: if isAdmin();
+      }
+
+      // ---------- สิ่งกีดขวาง: ทุกคนอ่าน / ผู้ใช้ทุกคน (รวม anonymous) แจ้งได้ ----------
+      match /obstacles/{id} {
+        allow read: if true;
+        allow create: if ownNew()
+          && request.resource.data.keys().hasOnly(['lat', 'lng', 'uid', 'timestamp'])
+          && validLatLng(request.resource.data);
+        allow update, delete: if isAdmin();
+      }
+
+      // ---------- ศูนย์พักพิง / จุดบริการ: ทุกคนอ่าน / แอดมินจัดการ ----------
+      match /shelters/{id} {
+        allow read: if true;
+        allow create: if isAdmin()
+          && request.resource.data.keys().hasOnly(['name', 'type', 'capacity', 'occupancy', 'open', 'lat', 'lng', 'updatedAt'])
+          && isStr(request.resource.data.name, 80) && request.resource.data.name.size() > 0
+          && request.resource.data.type in ['shelter', 'hospital', 'medical', 'supply']
+          && request.resource.data.capacity is int && request.resource.data.occupancy is int
+          && request.resource.data.open is bool
+          && validLatLng(request.resource.data);
+        allow update: if isAdmin()
+          && request.resource.data.keys().hasOnly(['name', 'type', 'capacity', 'occupancy', 'open', 'lat', 'lng', 'updatedAt'])
+          && request.resource.data.occupancy is int && request.resource.data.occupancy >= 0;
+        allow delete: if isAdmin();
+      }
+
+      // ---------- SOS: มีพิกัด/เบอร์โทร — แอดมินอ่านทั้งหมด / ผู้แจ้งอ่านเฉพาะของตัวเอง ----------
+      match /sos/{id} {
+        allow read: if isAdmin()
+          || (signedIn() && resource.data.uid == request.auth.uid);
+        allow create: if ownNew()
+          && request.resource.data.keys().hasOnly(['lat', 'lng', 'uid', 'level', 'people', 'phone', 'status', 'timestamp', 'updatedAt'])
+          && validLatLng(request.resource.data)
+          && request.resource.data.level in ['red', 'yellow', 'green']
+          && request.resource.data.status == 'new'
+          && request.resource.data.people is int
+          && request.resource.data.people >= 0 && request.resource.data.people <= 999
+          && isStr(request.resource.data.phone, 20);
+        // แอดมินเปลี่ยนได้เฉพาะสถานะเคส
+        allow update: if isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status in ['new', 'enroute', 'done'];
+        allow delete: if isAdmin();
+      }
+
+      // ---------- แจ้งว่าปลอดภัย: ค้นหาได้ครั้งละไม่เกิน 20 รายการ (กันดึงข้อมูลทั้งหมด) ----------
+      match /checkins/{id} {
+        allow get: if true;
+        allow list: if isAdmin() || request.query.limit <= 20;
+        allow create: if ownNew()
+          && request.resource.data.keys().hasOnly(['name', 'nameLower', 'words', 'area', 'message', 'uid', 'timestamp'])
+          && isStr(request.resource.data.name, 60) && request.resource.data.name.size() >= 2
+          && request.resource.data.nameLower == request.resource.data.name.lower()
+          && request.resource.data.words is list && request.resource.data.words.size() <= 10
+          && isStr(request.resource.data.area, 60)
+          && isStr(request.resource.data.message, 140);
+        allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      }
+
+      // ---------- รายงานอาการในศูนย์พักพิง: ใครก็ส่งได้ / แอดมินอ่าน ----------
+      match /disease/{id} {
+        allow read: if isAdmin();
+        allow create: if ownNew()
+          && request.resource.data.keys().hasOnly(['shelter', 'reporter', 'fever', 'diarrhea', 'respiratory', 'conjunctivitis', 'skin', 'lepto', 'uid', 'timestamp'])
+          && isStr(request.resource.data.shelter, 80) && request.resource.data.shelter.size() > 0
+          && isStr(request.resource.data.reporter, 60)
+          && isCount(request.resource.data.fever) && isCount(request.resource.data.diarrhea)
+          && isCount(request.resource.data.respiratory) && isCount(request.resource.data.conjunctivitis)
+          && isCount(request.resource.data.skin) && isCount(request.resource.data.lepto);
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}
