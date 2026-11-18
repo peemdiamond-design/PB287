@@ -1,7 +1,7 @@
 /* PB287 Service Worker — ให้คู่มือ เบอร์ฉุกเฉิน และแผนที่ที่เคยเปิด ใช้งานได้แม้ไม่มีอินเทอร์เน็ต
  * เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ในเว็บ เพื่อให้เครื่องผู้ใช้โหลดของใหม่
  */
-const VERSION = 'pb287-v3';
+const VERSION = 'pb287-v4';
 const SHELL_CACHE = `${VERSION}-shell`;
 const CDN_CACHE = `${VERSION}-cdn`;
 const TILE_CACHE = 'pb287-tiles';
