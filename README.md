@@ -6,30 +6,40 @@
 
 ## ฟีเจอร์
 
-**สำหรับประชาชน**
-- 🗺️ แผนที่แจ้งภัย (Leaflet + OpenStreetMap) — แจ้งจุดสิ่งกีดขวาง/เส้นทางขาด ที่ทุกคนเห็นร่วมกันแบบ real-time
-- 🆘 แจ้งพิกัด SOS พร้อมคัดแยกระดับ (Triage แดง/เหลือง/เขียว) จำนวนคน และเบอร์ติดต่อกลับ — ส่งตรงถึงเจ้าหน้าที่ EOC
-- 📍 ปุ่ม "ตำแหน่งฉัน" ใช้ GPS ระบุตำแหน่ง และค้นหาโรงพยาบาล/ศูนย์พักพิงที่ใกล้ที่สุด
-- 📖 คู่มือเอาชีวิตรอด 4 ภัยหลัก (น้ำท่วม, แผ่นดินไหว, อัคคีภัย/สารเคมี, โรคระบาด)
-- 🎒 Checklist กระเป๋าฉุกเฉิน 72 ชั่วโมง (บันทึกในเครื่อง)
-- ☎️ เบอร์โทรฉุกเฉิน กดโทรได้ทันที (1669, 1784, 199, 191, 1323, 1422)
-- 🧠 การปฐมพยาบาลทางใจ (PFA: Look-Listen-Link) และอนามัยสิ่งแวดล้อม 3 ระยะ (WASH)
-- 🌏 สลับภาษาไทย / English (จำค่าไว้ในเครื่อง)
+### สำหรับประชาชน
+| ฟีเจอร์ | รายละเอียด |
+|---|---|
+| 🗺️ แผนที่แจ้งภัย | Leaflet + OpenStreetMap — ศูนย์พักพิง, รพ., จุดแจกของ, สิ่งกีดขวาง, SOS แบบ real-time |
+| 🏕️ ศูนย์พักพิงใกล้ฉัน | รายการศูนย์ที่ EOC ประกาศ พร้อมจำนวนที่ว่าง เรียงจากใกล้ไปไกลด้วย GPS และปุ่มนำทาง |
+| 🆘 แจ้งพิกัด SOS | คัดแยก (Triage) แดง/เหลือง/เขียว + จำนวนคน + เบอร์ติดต่อ ติดตามสถานะได้ (รอรับเรื่อง → ทีมกำลังไป → ช่วยแล้ว) |
+| ✅ ฉันปลอดภัย / ค้นหาคน | แจ้งว่าปลอดภัยให้ญาติค้นหาชื่อได้ (ค้นได้ครั้งละไม่เกิน 20 รายการ) |
+| 📖 คู่มือ 4 ภัยหลัก + กลุ่มเปราะบาง | น้ำท่วม, แผ่นดินไหว, อัคคีภัย/สารเคมี, โรคระบาด + ผู้สูงอายุ, โรคเรื้อรัง, หญิงตั้งครรภ์/ทารก, เด็ก, สัตว์เลี้ยง |
+| 🧠 PFA + ประเมินสุขภาพใจ | หลัก 3L และแบบประเมิน **ST-5** / **2Q** ของกรมสุขภาพจิต (ไม่บันทึกคำตอบ) |
+| 💧 อนามัยสิ่งแวดล้อม | WASH 3 ระยะ + แบบฟอร์มรายงานอาการในศูนย์พักพิงสำหรับ อสม./เจ้าหน้าที่ |
+| 🎒 Go Bag Checklist | เตรียมของ 72 ชม. (บันทึกในเครื่อง) |
+| ☎️ เบอร์ฉุกเฉิน | 1669, 1784, 199, 191, 1323, 1422 กดโทรได้ทันที |
+| 📲 ติดตั้งเป็นแอป (PWA) | ใช้งานออฟไลน์ได้: คู่มือ เบอร์โทร แผนที่ที่เคยเปิด และ **SOS ที่ส่งตอนไม่มีสัญญาณจะถูกส่งอัตโนมัติเมื่อกลับมาออนไลน์** |
+| 🌏 ไทย / English | สลับภาษาได้ทั้งหน้า และจำค่าไว้ |
 
-**สำหรับเจ้าหน้าที่ EOC (แอดมิน)**
-- ส่ง/ลบประกาศแจ้งเตือนภัย แสดงบนแถบวิ่งด้านบนทุกหน้าจอแบบ real-time
-- ดูรายการคำขอ SOS ทั้งหมด เรียงตามความรุนแรง — ดูบนแผนที่, นำทาง, โทรกลับ, ปิดเคส
-- ลบจุดสิ่งกีดขวางที่แก้ไขแล้ว
+### สำหรับเจ้าหน้าที่ EOC (EOC Console)
+- **ภาพรวม:** SOS ค้างแยกตามสี, ทีมที่กำลังเดินทาง, ศูนย์พักพิงเปิด/อัตราครองเตียง, จำนวนผู้แจ้งปลอดภัย, สัญญาณเตือนโรค, กราฟ SOS รายชั่วโมง 24 ชม.
+- **SOS:** เรียงตามสถานะและความรุนแรง — ส่งทีม / ช่วยแล้ว / เปิดเคสใหม่, ดูบนแผนที่, นำทาง, โทรกลับ
+- **ประกาศ:** ส่ง/ลบประกาศแจ้งเตือน แสดงบนแถบวิ่งทุกหน้าจอ
+- **ศูนย์พักพิง:** ปักหมุดบนแผนที่, ปรับจำนวนผู้พักพิง ±1/±10, เปิด/ปิดรับ
+- **เฝ้าระวังโรค:** สรุปรายงานอาการ 24 ชม. ต่อศูนย์ ไฮไลต์เมื่อเกินเกณฑ์ (ปรับที่ `DISEASE_THRESHOLDS` ใน `js/app.js`)
+- **ส่งออก CSV** (เปิดใน Excel ภาษาไทยได้): SOS, ศูนย์พักพิง, รายงานโรค, ผู้แจ้งปลอดภัย
 
 ## โครงสร้างไฟล์
 
 | ไฟล์ | หน้าที่ |
 |---|---|
-| `index.html` | หน้าเว็บทั้งหมด (Tailwind CDN + Leaflet + Firebase SDK) |
-| `firestore.rules` | กฎความปลอดภัยของฐานข้อมูล Firestore |
-| `firebase.json`, `.firebaserc` | ตั้งค่าสำหรับ deploy rules ด้วย Firebase CLI |
-| `CNAME` | โดเมนสำหรับ GitHub Pages |
-| `Photo/` | รูปภาพ (ตรากระทรวงสาธารณสุข) |
+| `index.html` | โครงหน้าเว็บและเนื้อหา |
+| `js/app.js` | UI, แผนที่, คู่มือ, แบบประเมิน, EOC Console, PWA |
+| `js/cloud.js` | Firebase Auth + Firestore (real-time, offline cache) |
+| `sw.js` | Service Worker สำหรับใช้งานออฟไลน์ (**เปลี่ยน `VERSION` ทุกครั้งที่แก้เว็บ**) |
+| `manifest.webmanifest`, `icons/` | ข้อมูลสำหรับติดตั้งเป็นแอป |
+| `firestore.rules` | กฎความปลอดภัยของฐานข้อมูล |
+| `firebase.json`, `.firebaserc` | ตั้งค่า Firebase CLI |
 
 ## การ Deploy
 
@@ -37,35 +47,42 @@
 
 ### ตั้งค่า Firebase (ทำครั้งเดียว)
 
-1. **เปิด Authentication** ที่ Firebase Console → Authentication → Sign-in method → เปิด **Anonymous** และ **Email/Password**
-2. **Deploy Firestore Rules** (สำคัญมาก — ถ้าไม่ทำ ใครก็เขียนข้อมูลได้)
+1. **Authentication → Sign-in method:** เปิด **Anonymous** และ **Email/Password**
+2. **Deploy Firestore Rules** (สำคัญมาก — ถ้าไม่ทำ ใครก็แก้/ลบข้อมูลได้ และ rules แบบ test mode จะหมดอายุ)
    ```bash
    npm install -g firebase-tools
    firebase login
    firebase deploy --only firestore:rules
    ```
-   หรือคัดลอกเนื้อหา `firestore.rules` ไปวางใน Console → Firestore Database → Rules แล้วกด Publish
-3. **เพิ่มแอดมิน**: ให้เจ้าหน้าที่สมัครบัญชีผ่านหน้าเว็บ (ไอคอนแม่กุญแจ → สมัครสมาชิก) จากนั้น
-   - ไปที่ Console → Authentication → Users คัดลอก **User UID**
-   - ไปที่ Firestore → สร้าง collection `admins` → Document ID = UID นั้น → ใส่ field อะไรก็ได้ เช่น `email: "..."`
-   - ให้เจ้าหน้าที่รีเฟรชหน้าเว็บ จะเห็นป้าย "สิทธิ์ EOC Admin" ใน Dashboard
-4. **(แนะนำ)** Console → Authentication → Settings → Authorized domains เพิ่ม `pb287.peemcn25.dev`
+   หรือคัดลอก `firestore.rules` ไปวางใน Console → Firestore Database → Rules แล้วกด **Publish**
+3. **เพิ่มแอดมิน:** สมัครบัญชีผ่านหน้าเว็บ (ไอคอนแม่กุญแจ → สมัครสมาชิก) แล้ว
+   - Console → Authentication → Users → คัดลอก **User UID**
+   - Firestore → Start collection `admins` → Document ID = UID → เพิ่ม field เช่น `email`
+   - รีเฟรชหน้าเว็บ จะเห็นป้าย "สิทธิ์ EOC Admin" ใน Dashboard
+4. **(แนะนำ)** Authentication → Settings → Authorized domains เพิ่ม `pb287.peemcn25.dev`
 
 ### โครงสร้างข้อมูล Firestore
 
 ```
-admins/{uid}                                   ← รายชื่อแอดมิน (เพิ่มเองผ่าน Console)
-artifacts/pb287_portal/public/data/alerts/     ← { text, severity, timestamp }
-artifacts/pb287_portal/public/data/obstacles/  ← { lat, lng, uid, timestamp }
-artifacts/pb287_portal/public/data/sos/        ← { lat, lng, level, people, phone, uid, timestamp }
+admins/{uid}                                        ← รายชื่อแอดมิน (เพิ่มเองผ่าน Console)
+artifacts/pb287_portal/public/data/
+  alerts/     { text, severity, timestamp }                                   อ่าน: ทุกคน   เขียน: แอดมิน
+  obstacles/  { lat, lng, uid, timestamp }                                    อ่าน: ทุกคน   เขียน: ทุกคน
+  shelters/   { name, type, capacity, occupancy, open, lat, lng, updatedAt }  อ่าน: ทุกคน   เขียน: แอดมิน
+  sos/        { lat, lng, level, people, phone, status, uid, timestamp, updatedAt }
+                                                                              อ่าน: แอดมิน + เจ้าของ   แก้สถานะ: แอดมิน
+  checkins/   { name, nameLower, words[], area, message, uid, timestamp }     ค้นหา: ≤20 รายการ/ครั้ง
+  disease/    { shelter, reporter, fever, diarrhea, respiratory, conjunctivitis, skin, lepto, uid, timestamp }
+                                                                              อ่าน: แอดมิน   เขียน: ทุกคน
 ```
 
-## หมายเหตุด้านความปลอดภัย
+## หมายเหตุด้านความปลอดภัยและความเป็นส่วนตัว
 
-- Firebase Web config (apiKey ฯลฯ) ใน `index.html` **ไม่ใช่ความลับ** — ความปลอดภัยจริงอยู่ที่ `firestore.rules`
-- รหัสยืนยันเจ้าหน้าที่ตอนสมัครเป็นเพียงด่านแรกฝั่งหน้าเว็บ (ใครเปิดดู source ก็เห็น) สิทธิ์จริงคุมด้วย collection `admins`
+- Firebase Web config ใน `js/cloud.js` **ไม่ใช่ความลับ** — ความปลอดภัยจริงอยู่ที่ `firestore.rules`
+- รหัสยืนยันเจ้าหน้าที่ตอนสมัครเป็นเพียงด่านแรกฝั่งหน้าเว็บ สิทธิ์จริงคุมด้วย collection `admins`
 - ข้อมูล SOS (พิกัด + เบอร์โทร) อ่านได้เฉพาะแอดมินและผู้แจ้งเอง
-- ข้อความประกาศทุกข้อความถูก escape ก่อนแสดงผล ป้องกัน XSS
+- แบบประเมิน ST-5/2Q คำนวณในเครื่องผู้ใช้ ไม่ถูกส่งหรือบันทึก
+- ข้อความทุกชนิดที่ผู้ใช้ส่งถูก escape ก่อนแสดงผล ป้องกัน XSS
 
 ## ทดสอบในเครื่อง
 
@@ -73,7 +90,7 @@ artifacts/pb287_portal/public/data/sos/        ← { lat, lng, level, people, ph
 python3 -m http.server 8000
 # เปิด http://localhost:8000
 ```
-(ต้องเปิดผ่าน http server เพราะใช้ ES modules; GPS ทำงานบน `localhost` หรือ `https` เท่านั้น)
+GPS และ Service Worker ทำงานบน `localhost` หรือ `https` เท่านั้น
 
 ---
 เว็บไซต์ต้นแบบเพื่อการศึกษา — ในเหตุฉุกเฉินจริงโทร **1669**
