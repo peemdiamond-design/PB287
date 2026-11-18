@@ -2,24 +2,28 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>All-Hazards Portal - ศูนย์แจ้งเตือนทุกภัยพิบัติ กระทรวงสาธารณสุข</title>
-    <meta name="description" content="พอร์ทัลเตรียมพร้อมรับมือภัยพิบัติทุกประเภท: แผนที่แจ้งภัย แจ้งพิกัด SOS คู่มือเอาชีวิตรอด การปฐมพยาบาลทางใจ (PFA) และอนามัยสิ่งแวดล้อม">
+    <meta name="description" content="พอร์ทัลเตรียมพร้อมรับมือภัยพิบัติทุกประเภท: แผนที่แจ้งภัย ศูนย์พักพิง แจ้งพิกัด SOS แจ้งว่าปลอดภัย คู่มือเอาชีวิตรอด การปฐมพยาบาลทางใจ (PFA) และอนามัยสิ่งแวดล้อม">
     <meta name="theme-color" content="#005C2D">
     <meta property="og:title" content="All-Hazards Portal - ระบบ EOC ศูนย์รับมือภัยพิบัติ">
-    <meta property="og:description" content="แผนที่แจ้งภัย แจ้งพิกัด SOS คู่มือเอาชีวิตรอด 4 ภัยหลัก และเบอร์ฉุกเฉิน">
+    <meta property="og:description" content="แผนที่แจ้งภัย ศูนย์พักพิง แจ้งพิกัด SOS แจ้งว่าปลอดภัย และเบอร์ฉุกเฉิน">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://pb287.peemcn25.dev/">
-    <meta property="og:image" content="https://pb287.peemcn25.dev/Photo/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg">
+    <meta property="og:image" content="https://pb287.peemcn25.dev/icons/icon-512.png">
     <link rel="icon" type="image/svg+xml" href="/Photo/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="EOC Portal">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome (6.5 — มีไอคอน road-barrier, faucet-drip, ear-listen ในรุ่นฟรี) -->
+    <!-- Font Awesome 6.5 (ฟรี) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts (Sarabun) -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Leaflet CSS & JS -->
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -43,12 +47,14 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #005C2D; }
-        
+
         .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .tab-active { background-color: #005C2D; color: white; box-shadow: 0 2px 4px rgba(0,92,45,0.2); }
         .tab-inactive { background-color: transparent; color: #4B5563; }
         .tab-inactive:hover { background-color: #E5E7EB; }
-        
+        .atab-active { background-color: #005C2D; color: #fff; }
+        .atab-inactive { background-color: #F3F4F6; color: #4B5563; }
+
         @keyframes pulse-ring {
             0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
@@ -67,38 +73,39 @@
         .sos-icon-yellow { --sos-color: 234, 179, 8; animation: sos-pulse 1.5s infinite; }
         .sos-icon-green { --sos-color: 22, 163, 74; animation: sos-pulse 1.5s infinite; }
 
-        /* Ticker Animation */
         .ticker-wrap { width: 100%; overflow: hidden; background-color: #FEF3C7; padding: 8px 0; border-bottom: 1px solid #FDE68A; }
-        .ticker { display: inline-block; white-space: nowrap; padding-right: 100%; animation: ticker 25s linear infinite; }
+        .ticker { display: inline-flex; white-space: nowrap; padding-left: 100%; animation: ticker 30s linear infinite; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* ระบบแปลภาษา CSS */
+        /* ระบบแปลภาษา */
         .lang-en { display: none; }
         body.en-mode .lang-th { display: none !important; }
-        body.en-mode .lang-en { display: inline-block !important; }
-        body.en-mode .block-lang-en { display: block !important; }
+        body.en-mode .lang-en { display: inline !important; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .leaflet-div-icon.custom-icon, .custom-icon { background: transparent; border: none; }
+        .custom-icon { background: transparent; border: none; }
+        .q-opt input:checked + span { background-color: #7C3AED; color: #fff; border-color: #7C3AED; }
 
         @media (prefers-reduced-motion: reduce) {
             .ticker, .status-dot, .sos-icon-red, .sos-icon-yellow, .sos-icon-green, .animate-pulse { animation: none !important; }
-            .ticker { white-space: normal; padding-right: 0; }
+            .ticker { white-space: normal; padding-left: 0; flex-wrap: wrap; }
         }
     </style>
 </head>
 <body class="text-gray-800 antialiased flex flex-col min-h-screen">
 
+    <!-- ===================== MODALS ===================== -->
+
     <!-- General Alert Modal -->
-    <div id="customModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl transform transition-all">
-            <div class="text-center">
+    <div id="customModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[90] hidden flex items-center justify-center backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="text-center overflow-y-auto">
                 <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-blue-50 mb-4" id="modalIconContainer">
                     <i class="fas fa-info-circle text-blue-500 text-2xl" id="modalIcon"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2" id="modalTitle">แจ้งเตือน</h3>
-                <p class="text-sm text-gray-600 leading-relaxed" id="modalMessage">ข้อความ</p>
+                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line text-left" id="modalMessage">ข้อความ</p>
             </div>
             <div class="mt-6">
                 <button type="button" onclick="closeModal()" class="w-full inline-flex justify-center rounded-xl px-4 py-3 bg-moph-primary text-white hover:bg-moph-dark transition-colors font-bold">
@@ -109,8 +116,8 @@
     </div>
 
     <!-- SOS Triage Modal -->
-    <div id="sosModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[60] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+    <div id="sosModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[60] hidden flex items-center justify-center backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl max-h-[92vh] overflow-y-auto">
             <div class="text-center mb-5">
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 border-4 border-red-50">
                     <i class="fas fa-life-ring text-red-600 text-3xl animate-pulse"></i>
@@ -168,6 +175,45 @@
         </div>
     </div>
 
+    <!-- Shelter Form Modal (Admin) -->
+    <div id="shelterModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[85] hidden flex items-center justify-center backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-campground text-green-600 mr-2"></i> <span id="shelterModalTitle">เพิ่มศูนย์พักพิง / จุดบริการ</span></h3>
+            <input type="hidden" id="shelterId">
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block font-medium text-gray-700 mb-1" for="shelterName">ชื่อสถานที่</label>
+                    <input id="shelterName" maxlength="80" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="เช่น โรงเรียนวัดบางกระเจ้า">
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700 mb-1" for="shelterType">ประเภท</label>
+                    <select id="shelterType" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="shelter">ศูนย์พักพิงชั่วคราว</option>
+                        <option value="hospital">โรงพยาบาล / รพ.สต.</option>
+                        <option value="medical">จุดปฐมพยาบาล / หน่วยแพทย์</option>
+                        <option value="supply">จุดแจกน้ำ-อาหาร</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-gray-700 mb-1" for="shelterCapacity">รองรับได้ (คน)</label>
+                        <input id="shelterCapacity" type="number" min="0" max="100000" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="200">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-700 mb-1" for="shelterOccupancy">ปัจจุบัน (คน)</label>
+                        <input id="shelterOccupancy" type="number" min="0" max="100000" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="0">
+                    </div>
+                </div>
+                <label class="flex items-center gap-2"><input id="shelterOpen" type="checkbox" checked class="w-4 h-4"> เปิดรับคน</label>
+                <p id="shelterCoords" class="text-xs text-gray-500"></p>
+            </div>
+            <div class="mt-5 flex gap-2">
+                <button onclick="closeShelterModal()" class="flex-1 py-2 rounded-lg border border-gray-300 font-semibold text-gray-600">ยกเลิก</button>
+                <button onclick="saveShelter()" id="btnSaveShelter" class="flex-1 py-2 rounded-lg bg-moph-primary text-white font-bold">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Nearby Places Modal -->
     <div id="nearbyModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[65] hidden flex items-center justify-center backdrop-blur-sm" role="dialog" aria-modal="true">
         <div class="bg-white rounded-2xl p-5 max-w-md w-full mx-4 shadow-2xl max-h-[88vh] flex flex-col">
@@ -183,14 +229,12 @@
     </div>
 
     <!-- Admin Login / Register Modal -->
-    <div id="adminLoginModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
+    <div id="adminLoginModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center backdrop-blur-sm" role="dialog" aria-modal="true">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
-            
             <div class="flex mb-4 border-b border-gray-200">
                 <button id="tabLogin" onclick="switchAuthTab('login')" class="flex-1 pb-2 border-b-2 border-moph-primary font-bold text-moph-primary transition">เข้าสู่ระบบ</button>
                 <button id="tabReg" onclick="switchAuthTab('reg')" class="flex-1 pb-2 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-600 transition">สมัครสมาชิก</button>
             </div>
-
             <div class="text-center mb-5">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
                     <i class="fas fa-user-shield text-gray-600 text-xl"></i>
@@ -198,92 +242,129 @@
                 <h3 class="text-xl font-bold text-gray-900" id="authTitle">EOC Admin Login</h3>
                 <p class="text-sm text-gray-500">สำหรับเจ้าหน้าที่ศูนย์ปฏิบัติการเท่านั้น</p>
             </div>
-            
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">อีเมล (Email)</label>
-                    <input type="email" id="adminEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-moph-primary focus:border-moph-primary" placeholder="email@example.com">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="adminEmail">อีเมล (Email)</label>
+                    <input type="email" id="adminEmail" autocomplete="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="email@example.com">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน (Password)</label>
-                    <input type="password" id="adminPwd" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-moph-primary focus:border-moph-primary" placeholder="ใส่รหัสผ่าน...">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="adminPwd">รหัสผ่าน (Password)</label>
+                    <input type="password" id="adminPwd" autocomplete="current-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="ใส่รหัสผ่าน...">
                 </div>
-                
-                <!-- ฟิลด์รหัสลับสำหรับตอนสมัครสมาชิกเท่านั้น -->
                 <div id="regCodeDiv" class="hidden">
-                    <label class="block text-sm font-medium text-red-600 mb-1"><i class="fas fa-key"></i> รหัสยืนยันเจ้าหน้าที่</label>
-                    <input type="text" id="regCode" autocomplete="off" class="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-red-50" placeholder="ใส่รหัสยืนยันที่ได้รับจากผู้ดูแล">
-                    <p class="text-[11px] text-gray-500 mt-1">สมัครแล้วต้องให้ผู้ดูแลเพิ่ม UID ของท่านใน <code>admins</code> ก่อน จึงจะส่งประกาศได้</p>
+                    <label class="block text-sm font-medium text-red-600 mb-1" for="regCode"><i class="fas fa-key"></i> รหัสยืนยันเจ้าหน้าที่</label>
+                    <input type="text" id="regCode" autocomplete="off" class="w-full px-4 py-2 border border-red-300 rounded-lg bg-red-50" placeholder="ใส่รหัสยืนยันที่ได้รับจากผู้ดูแล">
+                    <p class="text-[11px] text-gray-500 mt-1">สมัครแล้วต้องให้ผู้ดูแลเพิ่ม UID ของท่านใน <code>admins</code> ก่อน จึงจะใช้งานแอดมินได้</p>
                 </div>
-
                 <p id="adminLoginError" class="text-xs text-red-500 mt-1 hidden text-center font-bold"></p>
-                
                 <button id="btnSubmitAuth" onclick="processAuth()" class="w-full bg-moph-primary text-white font-bold py-2 rounded-lg hover:bg-moph-dark transition">เข้าสู่ระบบ</button>
                 <button onclick="closeAdminLogin()" class="w-full text-gray-500 text-sm font-semibold hover:text-gray-700">ยกเลิก</button>
             </div>
         </div>
     </div>
 
-    <!-- Admin Dashboard Modal -->
-    <div id="adminDashboardModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-900"><i class="fas fa-broadcast-tower text-moph-primary mr-2"></i> ระบบจัดการแจ้งเตือนภัย (Live Alerts)</h3>
-                <button onclick="closeAdminDashboard()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+    <!-- Admin Dashboard (EOC Console) -->
+    <div id="adminDashboardModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl p-4 sm:p-6 max-w-4xl w-full mx-2 sm:mx-4 shadow-2xl h-[92vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-900"><i class="fas fa-broadcast-tower text-moph-primary mr-2"></i> EOC Console</h3>
+                <button onclick="closeAdminDashboard()" class="text-gray-400 hover:text-gray-600" aria-label="ปิด"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
-            <div class="flex-1 overflow-y-auto pr-1">
-            <!-- สถานะบัญชี -->
-            <div id="adminStatus" class="text-xs rounded-lg px-3 py-2 mb-4 bg-gray-50 border border-gray-200 text-gray-600">กำลังตรวจสอบสิทธิ์...</div>
+            <div id="adminStatus" class="text-xs rounded-lg px-3 py-2 mb-3 bg-gray-50 border border-gray-200 text-gray-600">กำลังตรวจสอบสิทธิ์...</div>
 
-            <!-- เพิ่มการแจ้งเตือน -->
-            <div class="bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">
-                <h4 class="font-bold text-blue-900 text-sm mb-3">ยกระดับ / เพิ่มประกาศใหม่</h4>
-                <div class="space-y-3">
-                    <input type="text" id="newAlertText" maxlength="300" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="เช่น น้ำท่วมฉับพลัน: อพยพขึ้นที่สูงระดับ 2">
-                    <div class="flex gap-2">
-                        <select id="newAlertSeverity" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold">
-                            <option value="blue" class="text-blue-600">ข้อมูลทั่วไป (สีน้ำเงิน)</option>
-                            <option value="yellow" class="text-yellow-600">เฝ้าระวัง (สีเหลือง)</option>
-                            <option value="orange" class="text-orange-600">เตือนภัย (สีส้ม)</option>
-                            <option value="red" class="text-red-600">วิกฤต / อพยพด่วน (สีแดง)</option>
-                        </select>
-                        <button id="btnAddAlert" onclick="addNewAlert()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">ส่งประกาศ</button>
+            <div class="flex gap-1 overflow-x-auto no-scrollbar mb-4 text-sm font-semibold">
+                <button data-atab="overview" onclick="switchAdminTab('overview')" class="atab px-3 py-1.5 rounded-lg whitespace-nowrap atab-active"><i class="fas fa-chart-column mr-1"></i> ภาพรวม</button>
+                <button data-atab="sos" onclick="switchAdminTab('sos')" class="atab px-3 py-1.5 rounded-lg whitespace-nowrap atab-inactive"><i class="fas fa-life-ring mr-1"></i> SOS <span id="sosCount" class="ml-1 text-xs bg-red-100 text-red-700 px-1.5 rounded-full">0</span></button>
+                <button data-atab="alerts" onclick="switchAdminTab('alerts')" class="atab px-3 py-1.5 rounded-lg whitespace-nowrap atab-inactive"><i class="fas fa-bullhorn mr-1"></i> ประกาศ</button>
+                <button data-atab="shelters" onclick="switchAdminTab('shelters')" class="atab px-3 py-1.5 rounded-lg whitespace-nowrap atab-inactive"><i class="fas fa-campground mr-1"></i> ศูนย์พักพิง</button>
+                <button data-atab="disease" onclick="switchAdminTab('disease')" class="atab px-3 py-1.5 rounded-lg whitespace-nowrap atab-inactive"><i class="fas fa-virus mr-1"></i> เฝ้าระวังโรค</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pr-1">
+                <!-- ภาพรวม -->
+                <div id="apanel-overview" class="apanel">
+                    <div id="overviewCards" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5"></div>
+                    <h4 class="font-bold text-gray-800 text-sm mb-2">SOS ที่เข้ามาใน 24 ชั่วโมงล่าสุด (รายชั่วโมง)</h4>
+                    <div id="sosHourlyChart" class="h-36 flex items-end gap-[2px] bg-gray-50 rounded-lg p-2 border border-gray-200 mb-1"></div>
+                    <div class="flex justify-between text-[10px] text-gray-400 mb-5"><span>-24 ชม.</span><span>-12 ชม.</span><span>ตอนนี้</span></div>
+                    <h4 class="font-bold text-gray-800 text-sm mb-2">ส่งออกข้อมูล (CSV สำหรับ Excel)</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportCsv('sos')" class="text-sm px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"><i class="fas fa-file-csv text-green-700 mr-1"></i> SOS</button>
+                        <button onclick="exportCsv('shelters')" class="text-sm px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"><i class="fas fa-file-csv text-green-700 mr-1"></i> ศูนย์พักพิง</button>
+                        <button onclick="exportCsv('disease')" class="text-sm px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"><i class="fas fa-file-csv text-green-700 mr-1"></i> รายงานโรค</button>
+                        <button onclick="exportCsv('checkins')" class="text-sm px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"><i class="fas fa-file-csv text-green-700 mr-1"></i> ผู้แจ้งปลอดภัย</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- รายการแจ้งเตือนปัจจุบัน -->
-            <h4 class="font-bold text-gray-800 text-sm mb-2">ประกาศที่กำลังแสดงผลหน้าเว็บ (Real-time)</h4>
-            <div id="adminAlertList" class="space-y-2 mb-5">
-                <p class="text-sm text-gray-500 text-center py-4">กำลังโหลดข้อมูลจากระบบ Cloud...</p>
-            </div>
+                <!-- SOS -->
+                <div id="apanel-sos" class="apanel hidden">
+                    <div class="flex gap-2 mb-3 text-xs font-semibold">
+                        <button data-sosfilter="active" onclick="setSosFilter('active')" class="sosf px-3 py-1 rounded-full bg-gray-800 text-white">กำลังดำเนินการ</button>
+                        <button data-sosfilter="done" onclick="setSosFilter('done')" class="sosf px-3 py-1 rounded-full bg-gray-100 text-gray-600">ช่วยแล้ว</button>
+                        <button data-sosfilter="all" onclick="setSosFilter('all')" class="sosf px-3 py-1 rounded-full bg-gray-100 text-gray-600">ทั้งหมด</button>
+                    </div>
+                    <div id="adminSosList" class="space-y-2"></div>
+                </div>
 
-            <!-- รายการ SOS จากประชาชน -->
-            <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center justify-between">
-                <span><i class="fas fa-life-ring text-red-500 mr-1"></i> คำขอ SOS จากประชาชน</span>
-                <span id="sosCount" class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">0</span>
-            </h4>
-            <div id="adminSosList" class="space-y-2">
-                <p class="text-sm text-gray-500 text-center py-4">ไม่มีคำขอ SOS</p>
-            </div>
+                <!-- ประกาศ -->
+                <div id="apanel-alerts" class="apanel hidden">
+                    <div class="bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">
+                        <h4 class="font-bold text-blue-900 text-sm mb-3">ยกระดับ / เพิ่มประกาศใหม่</h4>
+                        <div class="space-y-3">
+                            <input type="text" id="newAlertText" maxlength="300" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="เช่น น้ำท่วมฉับพลัน: อพยพขึ้นที่สูงระดับ 2">
+                            <div class="flex gap-2">
+                                <select id="newAlertSeverity" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold">
+                                    <option value="blue">ข้อมูลทั่วไป (สีน้ำเงิน)</option>
+                                    <option value="yellow">เฝ้าระวัง (สีเหลือง)</option>
+                                    <option value="orange">เตือนภัย (สีส้ม)</option>
+                                    <option value="red">วิกฤต / อพยพด่วน (สีแดง)</option>
+                                </select>
+                                <button id="btnAddAlert" onclick="addNewAlert()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">ส่งประกาศ</button>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 text-sm mb-2">ประกาศที่กำลังแสดงผลหน้าเว็บ (Real-time)</h4>
+                    <div id="adminAlertList" class="space-y-2">
+                        <p class="text-sm text-gray-500 text-center py-4">กำลังโหลดข้อมูลจากระบบ Cloud...</p>
+                    </div>
+                </div>
+
+                <!-- ศูนย์พักพิง -->
+                <div id="apanel-shelters" class="apanel hidden">
+                    <button onclick="startShelterPin()" class="mb-3 w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700"><i class="fas fa-map-pin mr-1"></i> ปักหมุดสถานที่ใหม่บนแผนที่</button>
+                    <div id="adminShelterList" class="space-y-2"></div>
+                </div>
+
+                <!-- เฝ้าระวังโรค -->
+                <div id="apanel-disease" class="apanel hidden">
+                    <p class="text-xs text-gray-500 mb-3">สรุปรายงานอาการจากศูนย์พักพิงใน <b>24 ชั่วโมงล่าสุด</b> — แถบสีแดงคือเกินเกณฑ์แจ้งเตือนตัวอย่าง (ปรับได้ในโค้ด <code>DISEASE_THRESHOLDS</code>) ควรส่งต่อทีม SRRT สอบสวนโรค</p>
+                    <div id="diseaseSummary" class="overflow-x-auto"></div>
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- ===================== HEADER ===================== -->
+
+    <!-- Offline Banner -->
+    <div id="offlineBanner" class="hidden bg-gray-800 text-white text-xs text-center py-1.5 px-3 z-50">
+        <i class="fas fa-wifi mr-1 opacity-60"></i>
+        <span class="lang-th">ออฟไลน์อยู่ — คู่มือและเบอร์ฉุกเฉินยังใช้ได้ คำขอ SOS จะถูกส่งอัตโนมัติเมื่อมีสัญญาณ</span>
+        <span class="lang-en">You are offline — guides and hotlines still work. SOS requests will be sent automatically when back online.</span>
     </div>
 
     <!-- Multi-Hazard Live Ticker -->
     <div class="ticker-wrap relative z-30">
-        <div class="ticker text-sm font-bold text-yellow-900 flex gap-8" id="live-ticker">
-            <span class="flex items-center gap-2"><div class="w-2 h-2 bg-gray-500 rounded-full status-dot"></div> กำลังเชื่อมต่อระบบศูนย์แจ้งเตือน EOC...</span>
+        <div class="ticker text-sm font-bold text-yellow-900 gap-8" id="live-ticker">
+            <span class="flex items-center gap-2"><span class="w-2 h-2 bg-gray-500 rounded-full status-dot inline-block"></span> กำลังเชื่อมต่อระบบศูนย์แจ้งเตือน EOC...</span>
         </div>
     </div>
 
-    <!-- Navigation / Header -->
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16 md:h-20">
                 <div class="flex items-center gap-3 md:gap-4">
-                    <img src="/Photo/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg" alt="ตรากระทรวงสาธารณสุข" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/e/eb/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg'" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm">
+                    <img src="/Photo/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg" alt="ตรากระทรวงสาธารณสุข" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm">
                     <div class="flex flex-col">
                         <h1 class="text-lg md:text-xl font-bold text-moph-primary leading-tight">
                             <span class="lang-th">ระบบ EOC ศูนย์รับมือภัยพิบัติ</span><span class="lang-en">EOC Disaster Response</span>
@@ -292,21 +373,19 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <!-- ปุ่มเปิด Login (ซ่อนเมื่อเข้าสู่ระบบแล้ว) -->
-                    <button id="btnOpenLogin" onclick="openAdminLogin()" class="text-gray-400 hover:text-moph-primary bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg transition-colors" title="สำหรับเจ้าหน้าที่ EOC">
+                    <button id="btnInstall" onclick="installApp()" class="hidden text-moph-primary bg-green-50 border border-green-200 px-3 py-2 rounded-lg text-sm font-bold" title="ติดตั้งเป็นแอป">
+                        <i class="fas fa-download"></i> <span class="hidden sm:inline"><span class="lang-th">ติดตั้งแอป</span><span class="lang-en">Install</span></span>
+                    </button>
+                    <button id="btnOpenLogin" onclick="openAdminLogin()" class="text-gray-400 hover:text-moph-primary bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg transition-colors" title="สำหรับเจ้าหน้าที่ EOC" aria-label="เข้าสู่ระบบเจ้าหน้าที่">
                         <i class="fas fa-lock"></i>
                     </button>
-                    <!-- ปุ่มเปิด Dashboard แอดมิน (แสดงเมื่อเข้าสู่ระบบแล้ว) -->
                     <button id="btnAdminDash" onclick="openAdminDashboard()" class="hidden text-moph-primary hover:text-white bg-green-50 hover:bg-moph-primary border border-moph-primary px-3 py-2 rounded-lg transition-colors text-sm font-bold" title="จัดการระบบ EOC">
                         <i class="fas fa-tasks"></i> <span class="hidden sm:inline">Dashboard</span>
                     </button>
-                    <!-- ปุ่ม Logout (แสดงเมื่อเข้าสู่ระบบแล้ว) -->
-                    <button id="btnLogout" onclick="doLogout()" class="hidden text-red-500 hover:text-white bg-red-50 hover:bg-red-500 border border-red-200 px-3 py-2 rounded-lg transition-colors" title="ออกจากระบบ">
+                    <button id="btnLogout" onclick="doLogout()" class="hidden text-red-500 hover:text-white bg-red-50 hover:bg-red-500 border border-red-200 px-3 py-2 rounded-lg transition-colors" title="ออกจากระบบ" aria-label="ออกจากระบบ">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
-
-                    <!-- ปุ่มสลับภาษา TH/EN -->
-                    <button onclick="toggleLanguage()" class="text-gray-500 hover:text-blue-600 bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <button onclick="toggleLanguage()" class="text-gray-500 hover:text-blue-600 bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors" aria-label="Switch language">
                         <i class="fas fa-language text-lg"></i> <span class="hidden sm:inline ml-1 font-bold" id="lang-btn-text">EN</span>
                     </button>
                 </div>
@@ -314,9 +393,9 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- ===================== MAIN ===================== -->
     <main class="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        
+
         <div class="mb-8">
             <span class="inline-block px-3 py-1 bg-green-100 text-moph-primary text-xs font-bold rounded-full mb-3">
                 <span class="lang-th">คู่มือประชาชน / All-Hazard Guide</span><span class="lang-en">Public Guide / All-Hazards</span>
@@ -330,53 +409,65 @@
             </p>
         </div>
 
-        <!-- App-like Segmented Tabs -->
+        <!-- Tabs -->
         <div class="bg-gray-200/60 p-1 rounded-xl flex overflow-x-auto mb-8 shadow-inner no-scrollbar">
-            <button onclick="switchTab('risk')" id="btn-risk" class="tab-btn tab-active flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+            <button onclick="switchTab('risk')" id="btn-risk" class="tab-btn tab-active flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
                 <i class="fas fa-map-marked-alt"></i> <span class="lang-th">แผนที่ & เอาชีวิตรอด</span><span class="lang-en">Map & Survival</span>
             </button>
-            <button onclick="switchTab('mental')" id="btn-mental" class="tab-btn tab-inactive flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+            <button onclick="switchTab('safe')" id="btn-safe" class="tab-btn tab-inactive flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                <i class="fas fa-user-check"></i> <span class="lang-th">ฉันปลอดภัย / ค้นหาคน</span><span class="lang-en">Safe & Find</span>
+            </button>
+            <button onclick="switchTab('mental')" id="btn-mental" class="tab-btn tab-inactive flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
                 <i class="fas fa-hand-holding-heart"></i> <span class="lang-th">ดูแลจิตใจ (PFA)</span><span class="lang-en">Mental Care (PFA)</span>
             </button>
-            <button onclick="switchTab('env')" id="btn-env" class="tab-btn tab-inactive flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+            <button onclick="switchTab('env')" id="btn-env" class="tab-btn tab-inactive flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
                 <i class="fas fa-faucet-drip"></i> <span class="lang-th">อนามัยสิ่งแวดล้อม</span><span class="lang-en">Environmental Health</span>
             </button>
         </div>
 
-        <!-- Tab 1: Risk, Map & SOPs -->
+        <!-- ========== Tab 1: Map & Survival ========== -->
         <div id="tab-risk" class="tab-content block fade-in-up">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Left/Main Column: Map & All-Hazard SOPs -->
                 <div class="lg:col-span-2 space-y-6">
-                    
-                    <!-- Live Multi-Hazard Map -->
+
+                    <!-- Live Map -->
                     <div class="bg-white rounded-2xl shadow-card overflow-hidden border border-gray-100">
                         <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50/50 gap-3">
                             <h3 class="font-bold text-gray-800">
                                 <i class="fas fa-satellite-dish text-blue-600 mr-2"></i> <span class="lang-th">ระบบแผนที่แจ้งภัย (Live Map)</span><span class="lang-en">Live Hazard Map</span>
                             </h3>
                             <div class="flex gap-2 w-full sm:w-auto">
-                                <button id="btn-locate" onclick="locateMe()" class="flex-1 sm:flex-none justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-blue-200" title="ใช้ตำแหน่ง GPS ของฉัน">
+                                <button id="btn-locate" onclick="locateMe()" class="flex-1 sm:flex-none justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-blue-200">
                                     <i class="fas fa-location-crosshairs"></i> <span class="lang-th">ตำแหน่งฉัน</span><span class="lang-en">My Location</span>
                                 </button>
-                                <button id="btn-report" onclick="toggleReportMode()" class="flex-1 sm:flex-none justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-gray-200">
-                                    <i class="fas fa-road-barrier"></i> <span class="lang-th">สิ่งกีดขวาง</span><span class="lang-en">Obstacle</span>
-                                </button>
-                                <button id="btn-sos" onclick="toggleSosMode()" class="flex-1 sm:flex-none justify-center bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-red-200">
-                                    <i class="fas fa-life-ring"></i> <span class="lang-th">แจ้งพิกัด SOS</span><span class="lang-en">SOS Location</span>
-                                </button>
+                                <button id="btn-report" onclick="toggleReportMode()" class="flex-1 sm:flex-none justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-gray-200"></button>
+                                <button id="btn-sos" onclick="toggleSosMode()" class="flex-1 sm:flex-none justify-center bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1 border border-red-200"></button>
                             </div>
                         </div>
-                        
-                        <div id="map-toast" class="hidden text-white text-sm text-center py-2.5 font-bold animate-pulse shadow-inner"><span id="map-toast-msg"></span></div>
-                        <div id="map" class="h-72 w-full z-10 border-b border-gray-100 relative bg-gray-200 cursor-default"></div>
 
-                        <!-- General Safe Zones -->
+                        <div id="map-toast" class="hidden text-white text-sm text-center py-2.5 font-bold shadow-inner"><span id="map-toast-msg"></span></div>
+                        <div id="map" class="h-80 w-full z-10 border-b border-gray-100 relative bg-gray-200"></div>
+                        <div class="px-4 py-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500 border-b border-gray-100">
+                            <span><i class="fas fa-campground text-green-600"></i> <span class="lang-th">ศูนย์พักพิง</span><span class="lang-en">Shelter</span></span>
+                            <span><i class="fas fa-hospital text-blue-600"></i> <span class="lang-th">รพ./หน่วยแพทย์</span><span class="lang-en">Medical</span></span>
+                            <span><i class="fas fa-box-open text-amber-600"></i> <span class="lang-th">จุดแจกของ</span><span class="lang-en">Supplies</span></span>
+                            <span><i class="fas fa-times-circle text-gray-800"></i> <span class="lang-th">สิ่งกีดขวาง</span><span class="lang-en">Obstacle</span></span>
+                            <span><i class="fas fa-hand-paper text-red-600"></i> SOS</span>
+                        </div>
+
+                        <!-- My SOS status -->
+                        <div id="mySosCard" class="hidden p-4 bg-red-50/40 border-b border-red-100">
+                            <h4 class="text-sm font-bold text-red-800 mb-2"><i class="fas fa-life-ring mr-1"></i> <span class="lang-th">สถานะ SOS ของฉัน</span><span class="lang-en">My SOS Status</span></h4>
+                            <div id="mySosList" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Shelters list -->
                         <div class="p-4 bg-white space-y-3">
-                            <p class="text-sm text-gray-600 mb-2"><i class="fas fa-info-circle text-blue-500 mr-1"></i> <strong class="lang-th">การอพยพด่วน:</strong><strong class="lang-en">Evacuation:</strong> <span class="lang-th">กดปุ่มด้านล่าง ระบบจะใช้ GPS หาสถานที่ที่ใกล้คุณที่สุดพร้อมนำทาง</span><span class="lang-en">Tap below to find the nearest places using GPS, with directions.</span></p>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <p class="text-sm text-gray-600"><i class="fas fa-info-circle text-blue-500 mr-1"></i> <strong class="lang-th">การอพยพ:</strong><strong class="lang-en">Evacuation:</strong> <span class="lang-th">ศูนย์ที่ EOC ประกาศแสดงด้านล่าง หรือกดปุ่มเพื่อให้ระบบใช้ GPS หาสถานที่ใกล้คุณที่สุด</span><span class="lang-en">EOC-announced places are listed below, or tap a button to find the nearest places by GPS.</span></p>
+                            <div id="shelterList" class="space-y-2">
+                                <p class="text-sm text-gray-400 text-center py-2"><span class="lang-th">ยังไม่มีศูนย์พักพิงที่ EOC ประกาศ</span><span class="lang-en">No shelters announced by EOC yet.</span></p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                 <button type="button" onclick="findNearby('hospital')" class="text-left flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100 hover:bg-blue-100 transition">
                                      <div class="flex items-center gap-3">
                                          <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-hospital text-sm"></i></div>
@@ -394,96 +485,100 @@
                                             <p class="font-bold text-green-900 text-sm"><span class="lang-th">ศูนย์อพยพ / จุดรวมพลใกล้ฉัน</span><span class="lang-en">Nearest Shelters / Assembly Points</span></p>
                                             <p class="text-[10px] text-green-700"><span class="lang-th">ใช้ GPS ค้นหาและนำทาง</span><span class="lang-en">Find by GPS & navigate</span></p>
                                         </div>
-                                     </div>
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- All-Hazards SOPs (Grid) -->
+                    <!-- SOPs -->
                     <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
                         <h3 class="font-bold text-gray-900 text-lg mb-4">
-                            <i class="fas fa-book-open text-moph-primary mr-2"></i> 
+                            <i class="fas fa-book-open text-moph-primary mr-2"></i>
                             <span class="lang-th">คู่มือปฏิบัติการเอาชีวิตรอด 4 ภัยหลัก</span><span class="lang-en">Survival SOPs for 4 Major Hazards</span>
                         </h3>
-                        
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- ภัยน้ำท่วม -->
-                            <div class="border border-blue-200 rounded-xl p-4 hover:shadow-md transition bg-blue-50/30 group cursor-pointer" onclick="openModal('น้ำท่วม/ดินถล่ม (Flood/Landslide)', '1. ตัดไฟสับคัตเอาต์ทันที\n2. อพยพขึ้นที่สูง\n3. ห้ามเดินลุยน้ำเชี่ยวเด็ดขาด (น้ำลึก 15 ซม. ทำให้เสียหลักได้)\n4. เตรียมกระเป๋าฉุกเฉินให้พร้อม', 'fa-water', 'text-blue-500', 'bg-blue-100')">
+                            <button onclick="showGuide('flood')" class="text-left border border-blue-200 rounded-xl p-4 hover:shadow-md transition bg-blue-50/30 group">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-cloud-showers-heavy"></i></div>
                                     <h4 class="font-bold text-gray-800 group-hover:text-blue-700"><span class="lang-th">น้ำท่วม & ดินถล่ม</span><span class="lang-en">Flood & Landslide</span></h4>
                                 </div>
-                                <p class="text-xs text-gray-500"><span class="lang-th">วิธีย้ายของขึ้นที่สูง การตัดไฟ ระวังโรคฉี่หนู</span><span class="lang-en">Evacuation and electrical safety</span> <br><span class="text-blue-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
-                            </div>
-                            
-                            <!-- แผ่นดินไหว/สึนามิ -->
-                            <div class="border border-orange-200 rounded-xl p-4 hover:shadow-md transition bg-orange-50/30 group cursor-pointer" onclick="openModal('แผ่นดินไหว/สึนามิ (Earthquake/Tsunami)', '1. หมอบ บัง ยึดเกาะ (Drop, Cover, Hold on) ใต้โต๊ะแข็งแรง\n2. เมื่อแผ่นดินไหวหยุด ให้อพยพออกจากตึก ห้ามใช้ลิฟต์\n3. หากอยู่ชายหาดและรู้สึกถึงแผ่นดินไหว ให้อพยพขึ้นที่สูงทันทีโดยไม่ต้องรอไซเรน', 'fa-house-damage', 'text-orange-500', 'bg-orange-100')">
+                                <p class="text-xs text-gray-500"><span class="lang-th">วิธีย้ายของขึ้นที่สูง การตัดไฟ ระวังโรคฉี่หนู</span><span class="lang-en">Evacuation and electrical safety</span><br><span class="text-blue-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
+                            </button>
+                            <button onclick="showGuide('quake')" class="text-left border border-orange-200 rounded-xl p-4 hover:shadow-md transition bg-orange-50/30 group">
                                 <div class="flex items-center gap-3 mb-2">
-                                    <div class="bg-orange-100 text-orange-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-house-damage"></i></div>
+                                    <div class="bg-orange-100 text-orange-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-house-crack"></i></div>
                                     <h4 class="font-bold text-gray-800 group-hover:text-orange-700"><span class="lang-th">แผ่นดินไหว & สึนามิ</span><span class="lang-en">Earthquake & Tsunami</span></h4>
                                 </div>
-                                <p class="text-xs text-gray-500"><span class="lang-th">หลัก Drop, Cover, Hold on การหนีคลื่น</span><span class="lang-en">Drop, Cover, Hold on principles</span> <br><span class="text-orange-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
-                            </div>
-
-                            <!-- อัคคีภัย/สารเคมี -->
-                            <div class="border border-red-200 rounded-xl p-4 hover:shadow-md transition bg-red-50/30 group cursor-pointer" onclick="openModal('อัคคีภัย/สารเคมี (Fire/Chemical)', '1. ใช้ผ้าชุบน้ำปิดจมูก ก้มต่ำคลานหนีควันไฟ\n2. หากไฟไหม้เสื้อผ้า ให้ หยุด ล้ม กลิ้ง (Stop, Drop, Roll)\n3. กรณีสารเคมีรั่ว ให้อพยพเหนือลม และใส่หน้ากาก N95 ทันที', 'fa-fire', 'text-red-500', 'bg-red-100')">
+                                <p class="text-xs text-gray-500"><span class="lang-th">หลัก Drop, Cover, Hold on การหนีคลื่น</span><span class="lang-en">Drop, Cover, Hold on principles</span><br><span class="text-orange-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
+                            </button>
+                            <button onclick="showGuide('fire')" class="text-left border border-red-200 rounded-xl p-4 hover:shadow-md transition bg-red-50/30 group">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div class="bg-red-100 text-red-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-fire-extinguisher"></i></div>
                                     <h4 class="font-bold text-gray-800 group-hover:text-red-700"><span class="lang-th">อัคคีภัย & สารเคมี</span><span class="lang-en">Fire & Chemical Spill</span></h4>
                                 </div>
-                                <p class="text-xs text-gray-500"><span class="lang-th">หนีควัน การอพยพเหนือลมทิศทางสารเคมี</span><span class="lang-en">Smoke escaping and upwind evacuation</span> <br><span class="text-red-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
-                            </div>
-
-                            <!-- โรคระบาด -->
-                            <div class="border border-green-200 rounded-xl p-4 hover:shadow-md transition bg-green-50/30 group cursor-pointer" onclick="openModal('โรคระบาด (Pandemic/Outbreak)', '1. สวมหน้ากากอนามัยตลอดเวลาในศูนย์พักพิง\n2. ล้างมือด้วยสบู่หรือเจลแอลกอฮอล์บ่อยๆ\n3. หากมีไข้ ไอ หรือท้องเสีย ให้แจ้งเจ้าหน้าที่สาธารณสุข (SRRT) เพื่อแยกกักตัวทันที', 'fa-virus', 'text-green-500', 'bg-green-100')">
+                                <p class="text-xs text-gray-500"><span class="lang-th">หนีควัน การอพยพเหนือลมทิศทางสารเคมี</span><span class="lang-en">Smoke escaping and upwind evacuation</span><br><span class="text-red-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
+                            </button>
+                            <button onclick="showGuide('outbreak')" class="text-left border border-green-200 rounded-xl p-4 hover:shadow-md transition bg-green-50/30 group">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div class="bg-green-100 text-green-600 w-10 h-10 rounded-full flex items-center justify-center text-lg"><i class="fas fa-viruses"></i></div>
                                     <h4 class="font-bold text-gray-800 group-hover:text-green-700"><span class="lang-th">โรคระบาดอุบัติใหม่</span><span class="lang-en">Pandemic Outbreak</span></h4>
                                 </div>
-                                <p class="text-xs text-gray-500"><span class="lang-th">การกักตัว เฝ้าระวังโรคติดต่อ (One Health)</span><span class="lang-en">Quarantine and disease surveillance</span> <br><span class="text-green-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
-                            </div>
+                                <p class="text-xs text-gray-500"><span class="lang-th">การกักตัว เฝ้าระวังโรคติดต่อ (One Health)</span><span class="lang-en">Quarantine and disease surveillance</span><br><span class="text-green-500 underline mt-1 inline-block"><span class="lang-th">อ่านข้อปฏิบัติ</span><span class="lang-en">Read Guide</span> &rarr;</span></p>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Emergency Hotlines -->
+                    <!-- Vulnerable groups -->
+                    <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">
+                            <i class="fas fa-people-roof text-purple-600 mr-2"></i>
+                            <span class="lang-th">คู่มือกลุ่มเปราะบาง</span><span class="lang-en">Vulnerable Groups Guide</span>
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-4"><span class="lang-th">กลุ่มที่ต้องเตรียมตัวมากกว่าคนทั่วไป และควรอพยพก่อน</span><span class="lang-en">Groups who need extra preparation and should evacuate early.</span></p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <button onclick="showGuide('elderly')" class="p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-left transition">
+                                <i class="fas fa-person-cane text-purple-600 text-xl mb-1"></i>
+                                <p class="text-sm font-bold text-gray-800"><span class="lang-th">ผู้สูงอายุ / ผู้พิการ / ติดเตียง</span><span class="lang-en">Elderly / Disabled / Bedridden</span></p>
+                            </button>
+                            <button onclick="showGuide('chronic')" class="p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-left transition">
+                                <i class="fas fa-pills text-purple-600 text-xl mb-1"></i>
+                                <p class="text-sm font-bold text-gray-800"><span class="lang-th">ผู้ป่วยโรคเรื้อรัง</span><span class="lang-en">Chronic Illness</span></p>
+                            </button>
+                            <button onclick="showGuide('pregnant')" class="p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-left transition">
+                                <i class="fas fa-person-pregnant text-purple-600 text-xl mb-1"></i>
+                                <p class="text-sm font-bold text-gray-800"><span class="lang-th">หญิงตั้งครรภ์ / ทารก</span><span class="lang-en">Pregnancy / Infants</span></p>
+                            </button>
+                            <button onclick="showGuide('children')" class="p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-left transition">
+                                <i class="fas fa-child-reaching text-purple-600 text-xl mb-1"></i>
+                                <p class="text-sm font-bold text-gray-800"><span class="lang-th">เด็ก</span><span class="lang-en">Children</span></p>
+                            </button>
+                            <button onclick="showGuide('pets')" class="p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-left transition">
+                                <i class="fas fa-paw text-purple-600 text-xl mb-1"></i>
+                                <p class="text-sm font-bold text-gray-800"><span class="lang-th">สัตว์เลี้ยง & ปศุสัตว์</span><span class="lang-en">Pets & Livestock</span></p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hotlines -->
                     <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
                         <h3 class="font-bold text-gray-900 text-lg mb-4">
                             <i class="fas fa-phone-volume text-red-600 mr-2"></i>
                             <span class="lang-th">เบอร์โทรฉุกเฉิน (กดเพื่อโทร)</span><span class="lang-en">Emergency Hotlines (tap to call)</span>
                         </h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <a href="tel:1669" class="p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 transition">
-                                <p class="text-xl font-bold text-red-700">1669</p>
-                                <p class="text-xs text-gray-600"><span class="lang-th">เจ็บป่วยฉุกเฉิน (สพฉ.)</span><span class="lang-en">Medical Emergency</span></p>
-                            </a>
-                            <a href="tel:1784" class="p-3 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 transition">
-                                <p class="text-xl font-bold text-orange-700">1784</p>
-                                <p class="text-xs text-gray-600"><span class="lang-th">สายด่วนนิรภัย (ปภ.)</span><span class="lang-en">Disaster Hotline (DDPM)</span></p>
-                            </a>
-                            <a href="tel:199" class="p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 transition">
-                                <p class="text-xl font-bold text-red-700">199</p>
-                                <p class="text-xs text-gray-600"><span class="lang-th">ดับเพลิง / กู้ภัย</span><span class="lang-en">Fire & Rescue</span></p>
-                            </a>
-                            <a href="tel:191" class="p-3 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 transition">
-                                <p class="text-xl font-bold text-blue-700">191</p>
-                                <p class="text-xs text-gray-600"><span class="lang-th">เหตุด่วนเหตุร้าย (ตำรวจ)</span><span class="lang-en">Police</span></p>
-                            </a>
-                            <a href="tel:1323" class="p-3 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 transition">
-                                <p class="text-xl font-bold text-purple-700">1323</p>
-                                <p class="text-xs text-gray-600"><span class="lang-th">สายด่วนสุขภาพจิต</span><span class="lang-en">Mental Health Hotline</span></p>
-                            </a>
-                            <a href="tel:1422" class="p-3 rounded-xl border border-green-200 bg-green-50 hover:bg-green-100 transition">
-                                <p class="text-xl font-bold text-green-700">1422</p>
-                                <p class="text-xs text-gray-600"><span class="lang-th">กรมควบคุมโรค</span><span class="lang-en">Disease Control (DDC)</span></p>
-                            </a>
+                            <a href="tel:1669" class="p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 transition"><p class="text-xl font-bold text-red-700">1669</p><p class="text-xs text-gray-600"><span class="lang-th">เจ็บป่วยฉุกเฉิน (สพฉ.)</span><span class="lang-en">Medical Emergency</span></p></a>
+                            <a href="tel:1784" class="p-3 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 transition"><p class="text-xl font-bold text-orange-700">1784</p><p class="text-xs text-gray-600"><span class="lang-th">สายด่วนนิรภัย (ปภ.)</span><span class="lang-en">Disaster Hotline (DDPM)</span></p></a>
+                            <a href="tel:199" class="p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 transition"><p class="text-xl font-bold text-red-700">199</p><p class="text-xs text-gray-600"><span class="lang-th">ดับเพลิง / กู้ภัย</span><span class="lang-en">Fire & Rescue</span></p></a>
+                            <a href="tel:191" class="p-3 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 transition"><p class="text-xl font-bold text-blue-700">191</p><p class="text-xs text-gray-600"><span class="lang-th">เหตุด่วนเหตุร้าย (ตำรวจ)</span><span class="lang-en">Police</span></p></a>
+                            <a href="tel:1323" class="p-3 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 transition"><p class="text-xl font-bold text-purple-700">1323</p><p class="text-xs text-gray-600"><span class="lang-th">สายด่วนสุขภาพจิต</span><span class="lang-en">Mental Health Hotline</span></p></a>
+                            <a href="tel:1422" class="p-3 rounded-xl border border-green-200 bg-green-50 hover:bg-green-100 transition"><p class="text-xl font-bold text-green-700">1422</p><p class="text-xs text-gray-600"><span class="lang-th">กรมควบคุมโรค</span><span class="lang-en">Disease Control (DDC)</span></p></a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Universal Checklist -->
+                <!-- Go Bag -->
                 <div class="lg:col-span-1">
-                    <div class="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden sticky top-24">
+                    <div class="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden lg:sticky lg:top-24">
                         <div class="bg-moph-dark p-5 text-white">
                             <h3 class="font-bold text-lg flex items-center gap-2">
                                 <i class="fas fa-briefcase-medical text-moph-secondary"></i> <span class="lang-th">กระเป๋าฉุกเฉิน</span><span class="lang-en">Go Bag</span>
@@ -491,48 +586,13 @@
                             <p class="text-xs text-green-200 mt-1 opacity-90"><span class="lang-th">เตรียมพร้อมสำหรับ 72 ชั่วโมง</span><span class="lang-en">72-Hour Survival Kit</span></p>
                         </div>
                         <div class="p-5 space-y-4 max-h-[400px] overflow-y-auto" id="checklist-container">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-med" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">ยาสามัญ / ยาประจำตัว</span><span class="lang-en">Medications</span></span>
-                                </div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-firstaid" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">ชุดปฐมพยาบาล</span><span class="lang-en">First-Aid Kit</span></span>
-                                </div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-mask" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">หน้ากาก N95 & เจลล้างมือ</span><span class="lang-en">N95 Mask & Sanitizer</span></span>
-                                </div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-whistle" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">นกหวีด และ ไฟฉาย</span><span class="lang-en">Whistle & Flashlight</span></span>
-                                </div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-doc" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">เอกสารสำคัญ (กันน้ำ)</span><span class="lang-en">Important Documents</span></span>
-                                </div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-water" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">น้ำดื่มและอาหารแห้ง</span><span class="lang-en">Water & Dry Food</span></span>
-                                </div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" id="chk-power" class="mt-1 w-5 h-5 accent-moph-primary rounded border-gray-300 transition" onchange="saveChecklist()">
-                                <div class="flex-1">
-                                    <span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">วิทยุ FM & พาวเวอร์แบงค์</span><span class="lang-en">FM Radio & Powerbank</span></span>
-                                </div>
-                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-med" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">ยาสามัญ / ยาประจำตัว (อย่างน้อย 7 วัน)</span><span class="lang-en">Medications (7+ days)</span></span></div></label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-firstaid" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">ชุดปฐมพยาบาล</span><span class="lang-en">First-Aid Kit</span></span></div></label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-mask" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">หน้ากาก N95 & เจลล้างมือ</span><span class="lang-en">N95 Mask & Sanitizer</span></span></div></label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-whistle" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">นกหวีด และ ไฟฉาย</span><span class="lang-en">Whistle & Flashlight</span></span></div></label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-doc" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">เอกสารสำคัญ (ใส่ถุงกันน้ำ)</span><span class="lang-en">Important Documents (waterproof)</span></span></div></label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-water" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">น้ำดื่มและอาหารแห้ง</span><span class="lang-en">Water & Dry Food</span></span></div></label>
+                            <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="chk-power" class="mt-1 w-5 h-5 rounded" onchange="saveChecklist()"><div class="flex-1"><span class="block text-sm font-semibold text-gray-800 chk-label"><span class="lang-th">วิทยุ FM & พาวเวอร์แบงค์</span><span class="lang-en">FM Radio & Powerbank</span></span></div></label>
                         </div>
                         <div class="p-5 bg-gray-50 border-t border-gray-100">
                             <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
@@ -547,9 +607,63 @@
             </div>
         </div>
 
-        <!-- Tab 2: PFA (Psychological First Aid) -->
+        <!-- ========== Tab 2: Safe & Find ========== -->
+        <div id="tab-safe" class="tab-content hidden fade-in-up">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Check-in -->
+                <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-green-100 p-3 rounded-xl"><i class="fas fa-user-check text-green-600 text-xl"></i></div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900"><span class="lang-th">แจ้งว่าฉันปลอดภัย</span><span class="lang-en">Mark Myself Safe</span></h3>
+                            <p class="text-xs text-gray-500"><span class="lang-th">ให้ญาติและเพื่อนค้นหาชื่อคุณได้ ลดสายโทรเข้าศูนย์</span><span class="lang-en">Let family find you and reduce calls to the hotline.</span></p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <label for="ciName" class="block font-medium text-gray-700 mb-1"><span class="lang-th">ชื่อ-นามสกุล</span><span class="lang-en">Full name</span> *</label>
+                            <input id="ciName" maxlength="60" autocomplete="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="สมชาย ใจดี">
+                        </div>
+                        <div>
+                            <label for="ciArea" class="block font-medium text-gray-700 mb-1"><span class="lang-th">อยู่ที่ไหน (อำเภอ/ศูนย์พักพิง)</span><span class="lang-en">Where are you (district/shelter)</span></label>
+                            <input id="ciArea" maxlength="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="ศูนย์พักพิง โรงเรียน...">
+                        </div>
+                        <div>
+                            <label for="ciMsg" class="block font-medium text-gray-700 mb-1"><span class="lang-th">ข้อความถึงญาติ</span><span class="lang-en">Message to family</span></label>
+                            <input id="ciMsg" maxlength="140" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="ปลอดภัยดี อยู่กับแม่">
+                        </div>
+                        <p class="text-[11px] text-gray-400"><span class="lang-th">ทุกคนค้นหาข้อมูลนี้ได้ — อย่าใส่เบอร์โทร เลขบัตร หรือที่อยู่บ้าน</span><span class="lang-en">Anyone can search this — do not include phone, ID number, or home address.</span></p>
+                        <button id="btnCheckin" onclick="submitCheckin()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg transition"><i class="fas fa-check mr-1"></i> <span class="lang-th">ฉันปลอดภัย</span><span class="lang-en">I'm Safe</span></button>
+                    </div>
+                    <div id="myCheckins" class="mt-4 space-y-2"></div>
+                </div>
+
+                <!-- Search -->
+                <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-blue-100 p-3 rounded-xl"><i class="fas fa-magnifying-glass text-blue-600 text-xl"></i></div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900"><span class="lang-th">ค้นหาญาติ / คนรู้จัก</span><span class="lang-en">Find Family & Friends</span></h3>
+                            <p class="text-xs text-gray-500"><span class="lang-th">พิมพ์ชื่อหรือนามสกุล อย่างน้อย 2 ตัวอักษร</span><span class="lang-en">Type a first or last name (2+ characters).</span></p>
+                        </div>
+                    </div>
+                    <form onsubmit="event.preventDefault(); searchCheckins();" class="flex gap-2 mb-4">
+                        <input id="ciSearch" maxlength="60" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="ชื่อ หรือ นามสกุล">
+                        <button class="bg-blue-600 text-white px-4 rounded-lg font-bold text-sm"><i class="fas fa-search"></i></button>
+                    </form>
+                    <div id="ciResults" class="space-y-2 text-sm"></div>
+                    <div class="mt-5 p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-800">
+                        <i class="fas fa-circle-info mr-1"></i>
+                        <span class="lang-th">ไม่พบชื่อไม่ได้แปลว่าเกิดอันตราย อาจยังไม่ได้แจ้ง หากติดต่อไม่ได้นานเกินไป แจ้งคนหายที่ 1784 หรือ 191</span>
+                        <span class="lang-en">Not found does not mean harmed — they may not have checked in yet. If you cannot reach them, report a missing person at 1784 or 191.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== Tab 3: PFA ========== -->
         <div id="tab-mental" class="tab-content hidden fade-in-up">
-            <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border border-gray-100">
+            <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border border-gray-100 mb-6">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-brain text-purple-600 text-2xl"></i></div>
                     <div>
@@ -562,12 +676,12 @@
                         </p>
                     </div>
                 </div>
-                
+
                 <p class="text-gray-700 text-sm mb-6 leading-relaxed border-l-4 border-purple-500 pl-4 bg-purple-50 p-3 rounded-r-lg">
                     <span class="lang-th">ภัยพิบัติสร้างความสูญเสียฉับพลัน ประชาชนและอาสาสมัครสามารถช่วยกันได้เบื้องต้นด้วยหลักการ <strong>3L (มอง ฟัง ส่งต่อ)</strong> เพื่อลดความตื่นตระหนกและป้องกันภาวะ PTSD</span>
                     <span class="lang-en">Disasters cause sudden loss. Volunteers can provide basic care using the <strong>3L principle (Look, Listen, Link)</strong> to prevent PTSD.</span>
                 </p>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="relative bg-white border border-purple-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow group">
                         <div class="absolute -top-4 left-6 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md">1</div>
@@ -594,7 +708,7 @@
                         <i class="fas fa-link text-3xl text-purple-300 group-hover:text-purple-500 transition-colors mb-4 mt-2"></i>
                         <h4 class="font-bold text-gray-900 text-lg mb-2">Link <span class="lang-th">(ส่งต่อ)</span></h4>
                         <ul class="text-sm text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                            <li><span class="lang-th">ช่วยติดต่อญาติ ศูนย์ข้อมูลคนหาย</span><span class="lang-en">Help contact relatives</span></li>
+                            <li><span class="lang-th">ช่วยติดต่อญาติ (ใช้แท็บ "ฉันปลอดภัย / ค้นหาคน")</span><span class="lang-en">Help contact relatives (see "Safe & Find" tab)</span></li>
                             <li><span class="lang-th">เชื่อมโยงบริการทางการแพทย์</span><span class="lang-en">Link to medical services</span></li>
                             <li><span class="lang-th">ส่งต่อเคสซึมเศร้ารุนแรงให้ผู้เชี่ยวชาญ</span><span class="lang-en">Refer severe cases to experts</span></li>
                             <li><span class="lang-th">สายด่วนสุขภาพจิต</span><span class="lang-en">Mental health hotline</span> <a href="tel:1323" class="font-bold text-purple-700 underline">1323</a></li>
@@ -602,7 +716,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
                         <h4 class="font-bold text-gray-800 mb-4 text-center"><span class="lang-th">ข้อควรระวังในการสื่อสาร (Do's & Don'ts)</span><span class="lang-en">Communication Do's & Don'ts</span></h4>
                         <div class="grid grid-cols-2 gap-4 text-sm">
@@ -634,53 +748,93 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tab 3: อนามัยสิ่งแวดล้อม (Environmental Health) -->
-        <div id="tab-env" class="tab-content hidden fade-in-up">
+            <!-- Self-assessment -->
             <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border border-gray-100">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-teal-100 p-3 rounded-xl"><i class="fas fa-leaf text-teal-600 text-2xl"></i></div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900"><span class="lang-th">อนามัยสิ่งแวดล้อม 3 ระยะ (WASH & Disease Control)</span><span class="lang-en">WASH & Environmental Health</span></h3>
-                            <p class="text-sm text-gray-500"><span class="lang-th">การจัดการน้ำ สุขาภิบาล ในศูนย์พักพิง</span><span class="lang-en">Water, Sanitation, and Hygiene guidelines.</span></p>
-                        </div>
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-clipboard-question text-purple-600 text-2xl"></i></div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900"><span class="lang-th">ประเมินสุขภาพใจตนเอง</span><span class="lang-en">Mental Health Self-Check</span></h3>
+                        <p class="text-sm text-gray-500"><span class="lang-th">แบบประเมินความเครียด ST-5 และแบบคัดกรองซึมเศร้า 2Q ของกรมสุขภาพจิต</span><span class="lang-en">Department of Mental Health ST-5 stress scale and 2Q depression screen</span></p>
                     </div>
                 </div>
+                <p class="text-xs text-gray-400 mb-6"><i class="fas fa-lock mr-1"></i><span class="lang-th">คำตอบไม่ถูกบันทึกหรือส่งไปที่ใด เป็นการคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัย</span><span class="lang-en">Answers are not saved or sent anywhere. This is a screening, not a diagnosis.</span></p>
 
+                <h4 class="font-bold text-gray-800 mb-1">ST-5</h4>
+                <p class="text-sm text-gray-600 mb-3"><span class="lang-th">ในช่วง 2-4 สัปดาห์ที่ผ่านมา คุณมีอาการหรือความรู้สึกต่อไปนี้มากน้อยแค่ไหน</span><span class="lang-en">Over the past 2-4 weeks, how often have you had the following?</span></p>
+                <div id="st5Questions" class="space-y-4 mb-6"></div>
+
+                <h4 class="font-bold text-gray-800 mb-1">2Q</h4>
+                <p class="text-sm text-gray-600 mb-3"><span class="lang-th">ใน 2 สัปดาห์ที่ผ่านมา รวมวันนี้</span><span class="lang-en">In the past 2 weeks, including today</span></p>
+                <div id="q2Questions" class="space-y-4 mb-6"></div>
+
+                <button onclick="evaluateMental()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2.5 rounded-lg transition"><span class="lang-th">ดูผลการประเมิน</span><span class="lang-en">See Results</span></button>
+                <div id="mentalResult" class="hidden mt-6 rounded-xl p-5 border"></div>
+            </div>
+        </div>
+
+        <!-- ========== Tab 4: Environmental Health ========== -->
+        <div id="tab-env" class="tab-content hidden fade-in-up">
+            <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border border-gray-100 mb-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="bg-teal-100 p-3 rounded-xl"><i class="fas fa-leaf text-teal-600 text-2xl"></i></div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900"><span class="lang-th">อนามัยสิ่งแวดล้อม 3 ระยะ (WASH & Disease Control)</span><span class="lang-en">WASH & Environmental Health</span></h3>
+                        <p class="text-sm text-gray-500"><span class="lang-th">การจัดการน้ำ สุขาภิบาล ในศูนย์พักพิง</span><span class="lang-en">Water, Sanitation, and Hygiene guidelines.</span></p>
+                    </div>
+                </div>
                 <div class="space-y-6">
-                    <!-- ก่อนเกิดภัย -->
                     <div class="border-l-4 border-teal-300 bg-teal-50/30 p-4 rounded-r-lg">
                         <h4 class="font-bold text-teal-800 text-lg mb-3 flex items-center gap-2"><i class="fas fa-clipboard-check text-teal-500"></i> <span class="lang-th">ระยะก่อนเกิดภัย (Preparedness)</span><span class="lang-en">1. Preparedness Phase</span></h4>
                         <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> <span class="lang-th">สำรวจและสำรองแหล่งน้ำสะอาด</span><span class="lang-en">Survey and reserve clean water sources.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> <span class="lang-th">ตรวจสอบระบบบำบัดน้ำเสียไม่ให้อุดตัน</span><span class="lang-en">Ensure drainage systems are clear.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> <span class="lang-th">เตรียมคลอรีนน้ำและปูนขาวให้พร้อม</span><span class="lang-en">Stock up on chlorine and lime.</span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> <span><span class="lang-th">สำรวจและสำรองแหล่งน้ำสะอาด</span><span class="lang-en">Survey and reserve clean water sources.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> <span><span class="lang-th">ตรวจสอบระบบบำบัดน้ำเสียไม่ให้อุดตัน</span><span class="lang-en">Ensure drainage systems are clear.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i> <span><span class="lang-th">เตรียมคลอรีนน้ำและปูนขาวให้พร้อม</span><span class="lang-en">Stock up on chlorine and lime.</span></span></li>
                         </ul>
                     </div>
-
-                    <!-- ระหว่างเกิดภัย -->
                     <div class="border-l-4 border-orange-300 bg-orange-50/30 p-4 rounded-r-lg">
                         <h4 class="font-bold text-orange-800 text-lg mb-3 flex items-center gap-2"><i class="fas fa-exclamation-triangle text-orange-500"></i> <span class="lang-th">ระยะระหว่างเกิดภัย (Response)</span><span class="lang-en">2. Response Phase</span></h4>
                         <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
-                            <li class="flex items-start gap-2"><i class="fas fa-biohazard text-red-500 mt-1"></i> <strong><span class="lang-th">น้ำ:</span><span class="lang-en">Water:</span></strong> <span class="lang-th">ห้ามใช้น้ำแหล่งธรรมชาติ ให้ดื่มน้ำบรรจุขวด</span><span class="lang-en">Use only sealed bottled water.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-restroom text-blue-500 mt-1"></i> <strong><span class="lang-th">ส้วมฉุกเฉิน:</span><span class="lang-en">Sanitation:</span></strong> <span class="lang-th">ใช้ถุงดำ มัดปากถุงให้แน่นและโรยปูนขาว</span><span class="lang-en">Use sealed black bags with lime.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-utensils text-orange-500 mt-1"></i> <strong><span class="lang-th">อาหาร:</span><span class="lang-en">Food:</span></strong> <span class="lang-th">อาหารกล่องต้องมีป้ายเวลา ทิ้งหากเกิน 4 ชม.</span><span class="lang-en">Discard boxed food after 4 hours.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-trash text-gray-500 mt-1"></i> <strong><span class="lang-th">ขยะติดเชื้อ:</span><span class="lang-en">Waste:</span></strong> <span class="lang-th">ทิ้งหน้ากากในถุงแดง มัดแน่นกันแมลงวัน</span><span class="lang-en">Dispose of masks in sealed red bags.</span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-biohazard text-red-500 mt-1"></i> <span><strong><span class="lang-th">น้ำ:</span><span class="lang-en">Water:</span></strong> <span class="lang-th">ห้ามใช้น้ำแหล่งธรรมชาติ ให้ดื่มน้ำบรรจุขวด</span><span class="lang-en">Use only sealed bottled water.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-restroom text-blue-500 mt-1"></i> <span><strong><span class="lang-th">ส้วมฉุกเฉิน:</span><span class="lang-en">Sanitation:</span></strong> <span class="lang-th">ใช้ถุงดำ มัดปากถุงให้แน่นและโรยปูนขาว</span><span class="lang-en">Use sealed black bags with lime.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-utensils text-orange-500 mt-1"></i> <span><strong><span class="lang-th">อาหาร:</span><span class="lang-en">Food:</span></strong> <span class="lang-th">อาหารกล่องต้องมีป้ายเวลา ทิ้งหากเกิน 4 ชม.</span><span class="lang-en">Discard boxed food after 4 hours.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-trash text-gray-500 mt-1"></i> <span><strong><span class="lang-th">ขยะติดเชื้อ:</span><span class="lang-en">Waste:</span></strong> <span class="lang-th">ทิ้งหน้ากากในถุงแดง มัดแน่นกันแมลงวัน</span><span class="lang-en">Dispose of masks in sealed red bags.</span></span></li>
                         </ul>
                     </div>
-
-                    <!-- หลังเกิดภัย -->
                     <div class="border-l-4 border-blue-300 bg-blue-50/30 p-4 rounded-r-lg">
                         <h4 class="font-bold text-blue-800 text-lg mb-3 flex items-center gap-2"><i class="fas fa-tools text-blue-500"></i> <span class="lang-th">ระยะหลังเกิดภัย (Recovery)</span><span class="lang-en">3. Recovery Phase</span></h4>
                         <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
-                            <li class="flex items-start gap-2"><i class="fas fa-broom text-blue-500 mt-1"></i> <strong>Big Cleaning:</strong> <span class="lang-th">ทำความสะอาดพื้นที่ทันทีที่น้ำลด</span><span class="lang-en">Clean up immediately after disaster ends.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-vial text-blue-500 mt-1"></i> <strong><span class="lang-th">ฟื้นฟูแหล่งน้ำ:</span><span class="lang-en">Water Restore:</span></strong> <span class="lang-th">เติมคลอรีนในบ่อให้ได้ 0.5-1.0 ppm</span><span class="lang-en">Treat wells with 0.5-1.0 ppm chlorine.</span></li>
-                            <li class="flex items-start gap-2"><i class="fas fa-shield-alt text-green-500 mt-1"></i> <strong><span class="lang-th">เฝ้าระวังโรค:</span><span class="lang-en">Surveillance:</span></strong> <span class="lang-th">ระวังโรคฉี่หนู อาหารเป็นพิษ และโรคตาแดง</span><span class="lang-en">Monitor for Leptospirosis and food poisoning.</span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-broom text-blue-500 mt-1"></i> <span><strong>Big Cleaning:</strong> <span class="lang-th">ทำความสะอาดพื้นที่ทันทีที่น้ำลด</span><span class="lang-en">Clean up immediately after disaster ends.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-vial text-blue-500 mt-1"></i> <span><strong><span class="lang-th">ฟื้นฟูแหล่งน้ำ:</span><span class="lang-en">Water Restore:</span></strong> <span class="lang-th">เติมคลอรีนในบ่อให้ได้ 0.5-1.0 ppm</span><span class="lang-en">Treat wells with 0.5-1.0 ppm chlorine.</span></span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-shield-alt text-green-500 mt-1"></i> <span><strong><span class="lang-th">เฝ้าระวังโรค:</span><span class="lang-en">Surveillance:</span></strong> <span class="lang-th">ระวังโรคฉี่หนู อาหารเป็นพิษ และโรคตาแดง</span><span class="lang-en">Monitor for Leptospirosis and food poisoning.</span></span></li>
                         </ul>
                     </div>
                 </div>
+            </div>
+
+            <!-- Disease report form -->
+            <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border border-gray-100">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="bg-red-100 p-3 rounded-xl"><i class="fas fa-notes-medical text-red-600 text-2xl"></i></div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900"><span class="lang-th">รายงานอาการในศูนย์พักพิง</span><span class="lang-en">Shelter Symptom Report</span></h3>
+                        <p class="text-sm text-gray-500"><span class="lang-th">สำหรับ อสม. / เจ้าหน้าที่ประจำศูนย์ — รายงานจำนวนผู้มีอาการ "ใหม่" วันละครั้ง</span><span class="lang-en">For health volunteers / shelter staff — report NEW cases once a day.</span></p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mb-5"><span class="lang-th">ข้อมูลส่งถึง EOC เพื่อเฝ้าระวังการระบาด (Syndromic Surveillance) ไม่ต้องใส่ชื่อผู้ป่วย</span><span class="lang-en">Sent to EOC for syndromic surveillance. Do not include patient names.</span></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-4">
+                    <div>
+                        <label for="drShelter" class="block font-medium text-gray-700 mb-1"><span class="lang-th">ศูนย์พักพิง</span><span class="lang-en">Shelter</span> *</label>
+                        <input id="drShelter" list="drShelterOptions" maxlength="80" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="เลือกหรือพิมพ์ชื่อศูนย์">
+                        <datalist id="drShelterOptions"></datalist>
+                    </div>
+                    <div>
+                        <label for="drReporter" class="block font-medium text-gray-700 mb-1"><span class="lang-th">ผู้รายงาน / หน่วยงาน</span><span class="lang-en">Reporter / unit</span></label>
+                        <input id="drReporter" maxlength="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="อสม. / รพ.สต. ...">
+                    </div>
+                </div>
+                <div id="drFields" class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mb-5"></div>
+                <button id="btnDiseaseReport" onclick="submitDiseaseReport()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-lg transition"><i class="fas fa-paper-plane mr-1"></i> <span class="lang-th">ส่งรายงาน</span><span class="lang-en">Submit Report</span></button>
             </div>
         </div>
     </main>
@@ -690,7 +844,7 @@
     </a>
 
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-5xl mx-auto px-4 py-6 flex justify-between items-center text-center md:text-left text-xs md:text-sm">
+        <div class="max-w-5xl mx-auto px-4 py-6 flex justify-between items-center text-xs md:text-sm gap-4">
             <div>
                 <p class="font-bold text-gray-700">เว็บไซต์ต้นแบบ (Academic Prototype)</p>
                 <p class="text-gray-500">รายวิชา สธ 287 (PB287) | ครอบคลุมบูรณาการ 3 สัปดาห์+</p>
@@ -699,822 +853,7 @@
         </div>
     </footer>
 
-    <script>
-        // --- 0. Helpers ---
-        const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        window.escapeHtml = escapeHtml;
-        const t = (th, en) => (isEnMode ? en : th);
-        const fmtTime = (ms) => ms ? new Date(ms).toLocaleString(isEnMode ? 'en-GB' : 'th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
-        window.fmtTime = fmtTime;
-
-        // --- 1. Language Toggle (จำค่าภาษาไว้ในเครื่อง) ---
-        let isEnMode = false;
-        function applyLanguage() {
-            document.body.classList.toggle('en-mode', isEnMode);
-            document.documentElement.lang = isEnMode ? 'en' : 'th';
-            document.getElementById('lang-btn-text').innerText = isEnMode ? 'TH' : 'EN';
-            renderReportBtn(); renderSosBtn();
-            if (window.rerenderHazards) window.rerenderHazards();
-        }
-        function toggleLanguage() {
-            isEnMode = !isEnMode;
-            try { localStorage.setItem('ah_lang', isEnMode ? 'en' : 'th'); } catch (e) {}
-            applyLanguage();
-        }
-
-        // --- 2. Tab Navigation ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('tab-active'); el.classList.add('tab-inactive'); });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.remove('tab-inactive'); activeBtn.classList.add('tab-active');
-            if (tabId === 'risk' && map) setTimeout(() => { map.invalidateSize(); }, 100);
-        }
-
-        // --- 3. Map System ---
-        // ข้อมูลจุดกีดขวาง/SOS จะถูกส่งเข้า Firestore ผ่าน window.hazardStore (ตั้งค่าโดยสคริปต์ Firebase ด้านล่าง)
-        // หากเชื่อมต่อ Firebase ไม่ได้ จะบันทึกไว้ในเครื่อง (localStorage) แทน
-        let map, obstacleLayer, sosLayer, localLayer, myLocationMarker;
-        let isReportingMode = false, isSosMode = false, tempSosLatLng = null;
-
-        function initMap() {
-            map = L.map('map').setView([13.7563, 100.5018], 11);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            obstacleLayer = L.layerGroup().addTo(map);
-            sosLayer = L.layerGroup().addTo(map);
-            localLayer = L.layerGroup().addTo(map);
-            window.hazardMap = map;
-            loadLocalPins();
-            map.on('click', (e) => {
-                if (isReportingMode) reportObstacle(e.latlng);
-                else if (isSosMode) { tempSosLatLng = e.latlng; openSosModal(); }
-            });
-        }
-
-        function makeIcon(type, level) {
-            let html;
-            if (type === 'obstacle') {
-                html = '<div class="bg-gray-800 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md border-2 border-white"><i class="fas fa-times text-[10px]"></i></div>';
-            } else {
-                const lv = ['red', 'yellow', 'green'].includes(level) ? level : 'red';
-                const bg = { red: 'bg-red-600', yellow: 'bg-yellow-500', green: 'bg-green-500' }[lv];
-                html = `<div class="${bg} text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white sos-icon-${lv}"><i class="fas fa-hand-paper text-xs"></i></div>`;
-            }
-            return L.divIcon({ className: 'custom-icon', html, iconSize: [32, 32], iconAnchor: [16, 16] });
-        }
-
-        function sosLevelText(level) {
-            if (level === 'yellow') return t('เร่งด่วน (Yellow)', 'Urgent (Yellow)');
-            if (level === 'green') return t('รอได้ (Green)', 'Non-urgent (Green)');
-            return t('วิกฤต (Red)', 'Critical (Red)');
-        }
-
-        function sosStatusText(st) {
-            if (st === 'enroute') return t('เจ้าหน้าที่กำลังเดินทางไป', 'Rescue team on the way');
-            if (st === 'done') return t('ช่วยเหลือแล้ว', 'Resolved');
-            return t('รอเจ้าหน้าที่รับเรื่อง', 'Waiting for EOC');
-        }
-
-        function popupFor(type, d, canManage) {
-            let html;
-            if (type === 'obstacle') {
-                html = `<b><i class="fas fa-road-barrier"></i> ${t('สิ่งกีดขวาง/เส้นทางขาด', 'Obstacle / Road cut')}</b><br>${t('แจ้งโดยประชาชน', 'Reported by public')} · ${fmtTime(d.timestamp)}`;
-            } else {
-                html = `<b><i class="fas fa-life-ring"></i> ${t('SOS ขอความช่วยเหลือ', 'SOS Request')}</b><br>${t('สถานะ', 'Status')}: <b>${sosStatusText(d.status)}</b><br>${t('ระดับ', 'Level')}: ${sosLevelText(d.level)}<br>${fmtTime(d.timestamp)}`;
-                if (d.people) html += `<br>${t('จำนวนคน', 'People')}: ${escapeHtml(d.people)}`;
-                if (canManage && d.phone) html += `<br>${t('โทร', 'Phone')}: <a href="tel:${escapeHtml(d.phone)}">${escapeHtml(d.phone)}</a>`;
-            }
-            if (canManage && d.id) {
-                const id = escapeHtml(d.id);
-                if (type === 'sos') {
-                    if (d.status !== 'enroute') html += `<br><button onclick="setSosStatus('${id}','enroute')" class="mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">${t('ส่งทีม', 'Dispatch')}</button>`;
-                    html += ` <button onclick="setSosStatus('${id}','done')" class="mt-2 text-xs bg-green-600 text-white px-2 py-1 rounded">${t('ช่วยแล้ว', 'Resolved')}</button>`;
-                } else {
-                    html += `<br><button onclick="deleteHazard('obstacle','${id}')" class="mt-2 text-xs bg-red-50 text-red-600 px-2 py-1 rounded">${t('ลบจุดนี้', 'Remove')}</button>`;
-                }
-            }
-            return html;
-        }
-
-        // เรียกจากสคริปต์ Firebase เมื่อข้อมูลบน Cloud เปลี่ยน
-        window.renderRemotePins = (type, items, canManage) => {
-            const layer = type === 'obstacle' ? obstacleLayer : sosLayer;
-            if (!layer) return;
-            layer.clearLayers();
-            items.forEach(d => {
-                if (typeof d.lat !== 'number' || typeof d.lng !== 'number') return;
-                if (type === 'sos' && canManage && d.status === 'done') return; // เคสที่ช่วยแล้วไม่ต้องแสดงบนแผนที่แอดมิน
-                L.marker([d.lat, d.lng], { icon: makeIcon(type, d.status === 'done' ? 'green' : d.level) }).bindPopup(popupFor(type, d, canManage)).addTo(layer);
-            });
-        };
-        window.onHazardStoreReady = () => { if (localLayer) localLayer.clearLayers(); };
-
-        // --- Local fallback (เมื่อออฟไลน์) ---
-        function readLocal(type) { try { return JSON.parse(localStorage.getItem(`all_hazard_${type}s`)) || []; } catch (e) { return []; } }
-        function saveLocal(type, item) {
-            const list = readLocal(type);
-            list.push({ ...item, timestamp: Date.now() });
-            try { localStorage.setItem(`all_hazard_${type}s`, JSON.stringify(list)); } catch (e) {}
-            L.marker([item.lat, item.lng], { icon: makeIcon(type, item.level) })
-                .bindPopup(popupFor(type, item, false) + `<br><i class="text-xs text-gray-500">${t('บันทึกในเครื่องเท่านั้น', 'Saved on this device only')}</i>`)
-                .addTo(localLayer);
-        }
-        function loadLocalPins() {
-            ['obstacle', 'sos'].forEach(type => readLocal(type).forEach(d => {
-                L.marker([d.lat, d.lng], { icon: makeIcon(type, d.level) }).bindPopup(popupFor(type, d, false)).addTo(localLayer);
-            }));
-        }
-
-        function renderReportBtn() {
-            const btn = document.getElementById('btn-report');
-            btn.innerHTML = isReportingMode
-                ? `<i class="fas fa-times"></i> ${t('ยกเลิก', 'Cancel')}`
-                : `<i class="fas fa-road-barrier"></i> ${t('สิ่งกีดขวาง', 'Obstacle')}`;
-        }
-        function renderSosBtn() {
-            const btn = document.getElementById('btn-sos');
-            btn.innerHTML = isSosMode
-                ? `<i class="fas fa-times"></i> ${t('ยกเลิก SOS', 'Cancel')}`
-                : `<i class="fas fa-life-ring"></i> ${t('แจ้งพิกัด SOS', 'SOS Location')}`;
-        }
-
-        function toggleReportMode() {
-            if (isSosMode) toggleSosMode();
-            isReportingMode = !isReportingMode;
-            const btn = document.getElementById('btn-report');
-            if (isReportingMode) {
-                btn.classList.replace('bg-gray-100', 'bg-gray-800'); btn.classList.replace('text-gray-700', 'text-white');
-                showMapToast(`<i class="fas fa-road-barrier mr-2"></i> ${t('คลิกลงบนแผนที่เพื่อระบุจุดกีดขวาง', 'Click on map to mark obstacle.')}`, 'bg-gray-800');
-                document.getElementById('map').classList.add('cursor-crosshair');
-            } else {
-                btn.classList.replace('bg-gray-800', 'bg-gray-100'); btn.classList.replace('text-white', 'text-gray-700');
-                hideMapToast(); document.getElementById('map').classList.remove('cursor-crosshair');
-            }
-            renderReportBtn();
-        }
-
-        function toggleSosMode() {
-            if (isReportingMode) toggleReportMode();
-            isSosMode = !isSosMode;
-            const btn = document.getElementById('btn-sos');
-            if (isSosMode) {
-                btn.classList.replace('bg-red-100', 'bg-red-600'); btn.classList.replace('text-red-700', 'text-white');
-                showMapToast(`<i class="fas fa-life-ring mr-2"></i> ${t('คลิกเลือกตำแหน่งบนแผนที่ หรือกด "ตำแหน่งฉัน" เพื่อใช้ GPS', 'Click your position on the map, or tap "My Location" to use GPS.')}`, 'bg-red-600');
-                document.getElementById('map').classList.add('cursor-crosshair');
-            } else {
-                btn.classList.replace('bg-red-600', 'bg-red-100'); btn.classList.replace('text-white', 'text-red-700');
-                hideMapToast(); document.getElementById('map').classList.remove('cursor-crosshair');
-            }
-            renderSosBtn();
-        }
-
-        function showMapToast(msg, bgClass) {
-            const toast = document.getElementById('map-toast');
-            toast.className = `text-white text-sm text-center py-2.5 font-bold animate-pulse shadow-inner ${bgClass}`;
-            document.getElementById('map-toast-msg').innerHTML = msg; toast.classList.remove('hidden');
-        }
-        function hideMapToast() { document.getElementById('map-toast').classList.add('hidden'); }
-
-        function openSosModal() {
-            document.getElementById('sosPeople').value = '';
-            document.getElementById('sosModal').classList.remove('hidden');
-        }
-        function cancelSos() {
-            tempSosLatLng = null;
-            document.getElementById('sosModal').classList.add('hidden');
-            if (isSosMode) toggleSosMode();
-        }
-
-        async function reportObstacle(latlng) {
-            toggleReportMode();
-            let ok = false, queued = false;
-            if (window.hazardStore) {
-                try { queued = (await window.hazardStore.addObstacle(latlng.lat, latlng.lng)) === 'queued'; ok = true; } catch (e) { console.error(e); }
-            }
-            if (!ok) saveLocal('obstacle', { lat: latlng.lat, lng: latlng.lng });
-            if (queued) return openModal(t('กำลังส่งข้อมูล', 'Sending'), t('สัญญาณอ่อน ระบบจะส่งจุดนี้ให้อัตโนมัติเมื่อเชื่อมต่อได้ (อย่าปิดหน้านี้)', 'Weak signal — this will be sent automatically once connected (keep this page open).'), 'fa-clock', 'text-yellow-500', 'bg-yellow-50');
-            openModal(
-                ok ? t('รับแจ้งเหตุสำเร็จ', 'Report Sent') : t('บันทึกไว้ในเครื่อง', 'Saved Locally'),
-                ok ? t('บันทึกจุดสิ่งกีดขวาง/เส้นทางขาดแล้ว ผู้ใช้อื่นจะเห็นจุดนี้บนแผนที่', 'Obstacle marked. Other users will see it on the map.')
-                   : t('ยังเชื่อมต่อระบบ EOC ไม่ได้ จุดนี้จึงเห็นได้เฉพาะในเครื่องนี้', 'Could not reach EOC; this pin is visible on this device only.'),
-                ok ? 'fa-check-circle' : 'fa-exclamation-triangle', ok ? 'text-green-500' : 'text-yellow-500', ok ? 'bg-green-50' : 'bg-yellow-50');
-        }
-
-        async function submitSos(level) {
-            if (!tempSosLatLng) return;
-            const { lat, lng } = tempSosLatLng;
-            const people = Math.min(Math.max(parseInt(document.getElementById('sosPeople').value, 10) || 0, 0), 999);
-            const phone = document.getElementById('sosPhone').value.replace(/[^0-9+\-\s]/g, '').trim().slice(0, 20);
-            document.getElementById('sosModal').classList.add('hidden');
-            tempSosLatLng = null;
-            if (isSosMode) toggleSosMode();
-
-            let ok = false, queued = false;
-            if (window.hazardStore) {
-                try { queued = (await window.hazardStore.addSos(lat, lng, level, { people, phone })) === 'queued'; ok = true; } catch (e) { console.error(e); }
-            }
-            if (!ok) saveLocal('sos', { lat, lng, level, people });
-            if (queued) {
-                openModal(t('กำลังส่ง SOS', 'Sending SOS'),
-                          t('สัญญาณอ่อน ระบบจะส่ง SOS อัตโนมัติเมื่อเชื่อมต่อได้ (อย่าปิดหน้านี้) — ถ้าโทรได้ ให้โทร 1669 ทันที', 'Weak signal — your SOS will be sent once connected (keep this page open). If you can call, dial 1669 now.'),
-                          'fa-clock', 'text-yellow-500', 'bg-yellow-50');
-            } else if (ok) {
-                openModal(t('ส่งสัญญาณ SOS สำเร็จ', 'SOS Sent'),
-                          t('EOC ได้รับพิกัดแล้ว กรุณาอยู่ในที่ปลอดภัยและสงวนแบตเตอรี่ไว้', 'EOC has received your location. Stay safe and save battery.'),
-                          'fa-broadcast-tower', 'text-green-500', 'bg-green-50');
-            } else {
-                openModal(t('ส่ง SOS ไม่สำเร็จ', 'SOS Not Sent'),
-                          t('ไม่สามารถเชื่อมต่อศูนย์ EOC ได้ กรุณาโทร 1669 หรือ 1784 ทันที', 'Could not reach EOC. Please call 1669 or 1784 immediately.'),
-                          'fa-phone-alt', 'text-red-500', 'bg-red-50');
-            }
-        }
-
-        // --- GPS: ตำแหน่งของฉัน ---
-        function showMyLocation(lat, lng, accuracy) {
-            const ll = L.latLng(lat, lng);
-            if (myLocationMarker) myLocationMarker.setLatLng(ll);
-            else myLocationMarker = L.circleMarker(ll, { radius: 8, color: '#fff', weight: 3, fillColor: '#2563EB', fillOpacity: 1 }).addTo(map);
-            myLocationMarker.bindPopup(t('ตำแหน่งของคุณ', 'Your location') + (accuracy ? ` (±${Math.round(accuracy)} m)` : ''));
-            return ll;
-        }
-        function locateMe() {
-            if (!navigator.geolocation) {
-                openModal(t('ไม่รองรับ GPS', 'GPS Unavailable'), t('อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง กรุณาคลิกเลือกบนแผนที่แทน', 'This device cannot share location. Please click on the map instead.'), 'fa-location-crosshairs', 'text-yellow-500', 'bg-yellow-50');
-                return;
-            }
-            const btn = document.getElementById('btn-locate');
-            const old = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            navigator.geolocation.getCurrentPosition((pos) => {
-                btn.innerHTML = old;
-                const ll = showMyLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-                map.setView(ll, 15);
-                if (isSosMode) { tempSosLatLng = ll; openSosModal(); }
-            }, (err) => {
-                btn.innerHTML = old;
-                openModal(t('ระบุตำแหน่งไม่ได้', 'Location Error'),
-                          t('กรุณาอนุญาตการเข้าถึงตำแหน่ง หรือคลิกเลือกตำแหน่งบนแผนที่แทน', 'Please allow location access, or click on the map instead.'),
-                          'fa-location-crosshairs', 'text-yellow-500', 'bg-yellow-50');
-            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
-        }
-
-        // --- 3b. ค้นหาโรงพยาบาล / ศูนย์อพยพที่ใกล้ที่สุด (GPS + OpenStreetMap Overpass API) ---
-        const NEARBY = {
-            hospital: {
-                th: 'โรงพยาบาลใกล้ฉัน', en: 'Nearest Hospitals', google: 'โรงพยาบาล ใกล้ฉัน',
-                filters: ['nwr["amenity"="hospital"]', 'nwr["healthcare"="hospital"]', 'nwr["amenity"="clinic"]', 'nwr["healthcare"="centre"]']
-            },
-            shelter: {
-                th: 'ศูนย์อพยพ / จุดรวมพลใกล้ฉัน', en: 'Nearest Shelters', google: 'ศูนย์อพยพ ใกล้ฉัน',
-                filters: ['nwr["emergency"="assembly_point"]', 'nwr["social_facility"="shelter"]', 'nwr["emergency"="evacuation_centre"]', 'nwr["amenity"="shelter"]["shelter_type"="emergency"]']
-            }
-        };
-        const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
-        let nearbyLayer = null;
-        const kmBetween = (a, b) => {
-            const R = 6371, r = (d) => d * Math.PI / 180;
-            const h = Math.sin(r(b.lat - a.lat) / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(r(b.lng - a.lng) / 2) ** 2;
-            return 2 * R * Math.asin(Math.sqrt(h));
-        };
-        const getPosition = () => new Promise((resolve, reject) => {
-            if (!navigator.geolocation) return reject(new Error('no-geo'));
-            navigator.geolocation.getCurrentPosition(p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }), reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
-        });
-        async function overpass(query) {
-            for (const url of OVERPASS) {
-                try {
-                    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 15000);
-                    const res = await fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(query), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: ctrl.signal });
-                    clearTimeout(timer);
-                    if (res.ok) return (await res.json()).elements || [];
-                } catch (e) { console.warn('Overpass:', url, e); }
-            }
-            throw new Error('overpass-failed');
-        }
-        function placeKind(tags) {
-            if (tags.amenity === 'hospital' || tags.healthcare === 'hospital') return isEnMode ? 'Hospital' : 'โรงพยาบาล';
-            if (tags.healthcare === 'centre' || tags.amenity === 'clinic') return isEnMode ? 'Clinic / health center' : 'คลินิก / รพ.สต.';
-            if (tags.emergency === 'assembly_point') return isEnMode ? 'Assembly point' : 'จุดรวมพล';
-            return isEnMode ? 'Shelter' : 'ศูนย์พักพิง';
-        }
-        function nearbyGoogleUrl(kind, pos) {
-            const q = encodeURIComponent(NEARBY[kind].google);
-            return pos ? `https://www.google.com/maps/search/${q}/@${pos.lat.toFixed(5)},${pos.lng.toFixed(5)},14z` : `https://www.google.com/maps/search/?api=1&query=${q}`;
-        }
-        function closeNearby() { document.getElementById('nearbyModal').classList.add('hidden'); }
-        function showNearbyOnMap(lat, lng) {
-            closeNearby();
-            map.setView([lat, lng], 16);
-            document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        async function findNearby(kind) {
-            const cfg = NEARBY[kind];
-            const body = document.getElementById('nearbyBody');
-            document.getElementById('nearbyTitle').innerText = isEnMode ? cfg.en : cfg.th;
-            document.getElementById('nearbyGoogle').href = nearbyGoogleUrl(kind, null);
-            document.getElementById('nearbyModal').classList.remove('hidden');
-            const status = (icon, th, en) => body.innerHTML = `<p class="text-sm text-gray-500 text-center py-6"><i class="fas ${icon} mr-1"></i> ${isEnMode ? en : th}</p>`;
-
-            status('fa-spinner fa-spin', 'กำลังหาตำแหน่งของคุณ...', 'Getting your location...');
-            let pos;
-            try { pos = await getPosition(); }
-            catch (e) { return status('fa-crosshairs text-yellow-500', 'ระบุตำแหน่งไม่ได้ กรุณาอนุญาตการเข้าถึงตำแหน่ง (Location) ในเบราว์เซอร์ แล้วลองใหม่ หรือกดค้นหาใน Google Maps ด้านล่าง', 'Could not get your location. Please allow location access and try again, or use Google Maps below.'); }
-            document.getElementById('nearbyGoogle').href = nearbyGoogleUrl(kind, pos);
-            showMyLocation(pos.lat, pos.lng, null);
-
-            status('fa-spinner fa-spin', 'กำลังค้นหาสถานที่ใกล้คุณ...', 'Searching nearby places...');
-            let places = [];
-            try {
-                for (const radius of [5000, 20000, 50000]) {
-                    const q = `[out:json][timeout:20];(${cfg.filters.map(f => `${f}(around:${radius},${pos.lat},${pos.lng});`).join('')});out center 80;`;
-                    places = (await overpass(q)).map(el => {
-                        const lat = el.lat ?? el.center?.lat, lng = el.lon ?? el.center?.lon, tags = el.tags || {};
-                        return { lat, lng, tags, name: tags['name:th'] || tags.name || tags['name:en'] || (isEnMode ? '(unnamed)' : '(ไม่ระบุชื่อ)') };
-                    }).filter(p => typeof p.lat === 'number').map(p => ({ ...p, km: kmBetween(pos, p) }));
-                    if (places.length >= 3) break;
-                }
-            } catch (e) {
-                return status('fa-wifi text-red-500', 'เชื่อมต่อฐานข้อมูลแผนที่ไม่ได้ กรุณาลองใหม่ หรือกดค้นหาใน Google Maps ด้านล่าง', 'Could not reach the map database. Try again or use Google Maps below.');
-            }
-            // ปุ่มโรงพยาบาล: แสดงโรงพยาบาลก่อน (เรียงใกล้→ไกล) แล้วตามด้วยคลินิก/รพ.สต.
-            const isHosp = (p) => p.tags.amenity === 'hospital' || p.tags.healthcare === 'hospital';
-            places.sort((a, b) => (kind === 'hospital' ? (isHosp(b) - isHosp(a)) : 0) || a.km - b.km);
-            places = places.filter((p, i, arr) => arr.findIndex(q => q.name === p.name && Math.abs(q.km - p.km) < 0.2) === i).slice(0, 10);
-
-            if (nearbyLayer) nearbyLayer.clearLayers(); else nearbyLayer = L.layerGroup().addTo(map);
-            if (!places.length) {
-                const note = kind === 'shelter'
-                    ? ['ยังไม่พบศูนย์อพยพในฐานข้อมูลแผนที่ใกล้คุณ ศูนย์อพยพมักประกาศโดย อปท. หรือ ปภ. — สอบถามสายด่วน 1784 หรือกดค้นหาใน Google Maps ด้านล่าง', 'No shelters found in the map database near you. Shelters are usually announced by local authorities — call 1784 or use Google Maps below.']
-                    : ['ไม่พบโรงพยาบาลในรัศมี 50 กม. กรุณากดค้นหาใน Google Maps ด้านล่าง หรือโทร 1669', 'No hospitals found within 50 km. Use Google Maps below or call 1669.'];
-                return status('fa-circle-info text-blue-500', note[0], note[1]);
-            }
-            body.innerHTML = places.map(p => {
-                const color = kind === 'hospital' ? 'bg-blue-600' : 'bg-green-600';
-                const icon = kind === 'hospital' ? (isHosp(p) ? 'fa-hospital' : 'fa-clinic-medical') : 'fa-campground';
-                L.marker([p.lat, p.lng], { icon: L.divIcon({ className: 'custom-icon', html: `<div class="${color} text-white rounded-lg w-7 h-7 flex items-center justify-center shadow-md border-2 border-white"><i class="fas ${icon} text-xs"></i></div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) })
-                    .bindPopup(`<b>${escapeHtml(p.name)}</b><br>${placeKind(p.tags)} · ${p.km.toFixed(1)} km<br><a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" rel="noopener">${isEnMode ? 'Directions' : 'นำทาง'}</a>`)
-                    .addTo(nearbyLayer);
-                const phone = p.tags.phone || p.tags['contact:phone'];
-                return `<div class="p-3 rounded-lg border border-gray-200 bg-gray-50">
-                    <div class="flex justify-between gap-2">
-                        <div class="min-w-0">
-                            <p class="text-sm font-bold text-gray-800">${escapeHtml(p.name)}</p>
-                            <p class="text-xs text-gray-500">${placeKind(p.tags)} · <b>${p.km.toFixed(1)} ${isEnMode ? 'km' : 'กม.'}</b>${p.tags.emergency === 'yes' ? ` · <span class="text-red-600 font-semibold">${isEnMode ? 'Emergency room' : 'มีห้องฉุกเฉิน'}</span>` : ''}</p>
-                        </div>
-                        <div class="flex gap-1 flex-shrink-0">
-                            ${phone ? `<a href="tel:${escapeHtml(phone.split(';')[0].trim())}" class="text-xs bg-white border border-gray-300 px-2 py-1.5 rounded" title="โทร"><i class="fas fa-phone"></i></a>` : ''}
-                            <button onclick="showNearbyOnMap(${p.lat},${p.lng})" class="text-xs bg-white border border-gray-300 px-2 py-1.5 rounded" title="แผนที่"><i class="fas fa-map"></i></button>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" rel="noopener" class="text-xs ${color} text-white px-2 py-1.5 rounded font-bold"><i class="fas fa-route"></i> ${isEnMode ? 'Go' : 'นำทาง'}</a>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('') + `<p class="text-[10px] text-gray-400 text-center pt-1">${isEnMode ? 'Data' : 'ข้อมูล'} © OpenStreetMap contributors${kind === 'shelter' ? (isEnMode ? ' · Follow official evacuation orders (1784).' : ' · โปรดยึดตามประกาศอพยพของทางราชการ (1784)') : ''}</p>`;
-        }
-
-        // --- 4. Checklist ---
-        const checklistIds = ['chk-med', 'chk-firstaid', 'chk-mask', 'chk-whistle', 'chk-doc', 'chk-water', 'chk-power'];
-        function initChecklist() {
-            let count = 0;
-            checklistIds.forEach(id => {
-                const cb = document.getElementById(id); cb.checked = localStorage.getItem('ah_' + id) === 'true';
-                updateLabelStyle(cb); if (cb.checked) count++;
-            }); updateProgress(count);
-        }
-        function saveChecklist() {
-            let count = 0;
-            checklistIds.forEach(id => {
-                const cb = document.getElementById(id); localStorage.setItem('ah_' + id, cb.checked);
-                updateLabelStyle(cb); if (cb.checked) count++;
-            }); updateProgress(count);
-        }
-        function updateLabelStyle(cb) {
-            const label = cb.nextElementSibling.querySelector('.chk-label');
-            if (cb.checked) { label.classList.add('line-through', 'text-gray-400'); label.classList.remove('text-gray-800'); }
-            else { label.classList.remove('line-through', 'text-gray-400'); label.classList.add('text-gray-800'); }
-        }
-        function updateProgress(count) { document.getElementById('progress-bar').style.width = (count / checklistIds.length * 100) + '%'; }
-        function evaluateChecklist() {
-            const count = checklistIds.filter(id => document.getElementById(id).checked).length;
-            if (count === checklistIds.length) openModal(t('พร้อมรับมือ!', 'Ready!'), t('คุณเตรียมกระเป๋าฉุกเฉินครบ 100% (Go Bag)', 'You are 100% prepared.'), 'fa-check-circle', 'text-green-500', 'bg-green-50');
-            else openModal(t('ยังไม่ครบถ้วน', 'Incomplete'), t(`เตรียมอุปกรณ์ไปแล้ว ${count}/${checklistIds.length} รายการ`, `Prepared ${count}/${checklistIds.length} items.`), 'fa-exclamation-triangle', 'text-yellow-500', 'bg-yellow-50');
-        }
-
-        // --- 5. Custom Modal ---
-        function openModal(title, message, iconClass, iconColor, iconBg) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalMessage').innerText = message;
-            document.getElementById('modalIcon').className = `fas ${iconClass} ${iconColor} text-2xl`;
-            document.getElementById('modalIconContainer').className = `mx-auto flex items-center justify-center h-14 w-14 rounded-full ${iconBg} mb-4`;
-            document.getElementById('customModal').classList.remove('hidden');
-        }
-        function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
-        window.openModal = openModal;
-
-        // ปิดหน้าต่างด้วยปุ่ม Esc
-        document.addEventListener('keydown', (e) => {
-            if (e.key !== 'Escape') return;
-            if (!document.getElementById('customModal').classList.contains('hidden')) return closeModal();
-            if (!document.getElementById('sosModal').classList.contains('hidden')) return cancelSos();
-            if (!document.getElementById('adminLoginModal').classList.contains('hidden')) return window.closeAdminLogin && window.closeAdminLogin();
-            if (!document.getElementById('adminDashboardModal').classList.contains('hidden')) return window.closeAdminDashboard && window.closeAdminDashboard();
-            if (isReportingMode) toggleReportMode();
-            if (isSosMode) toggleSosMode();
-        });
-
-        // สคริปต์อยู่ท้าย <body> แล้ว DOM พร้อมใช้งาน — เริ่มทำงานทันที เพื่อให้ map พร้อมก่อน Firebase
-        try { isEnMode = localStorage.getItem('ah_lang') === 'en'; } catch (e) {}
-        initChecklist();
-        initMap();
-        applyLanguage();
-    </script>
-
-    <!-- Firebase SDK & Admin System -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Web config ไม่ใช่ความลับ (ทุกคนเห็นได้จากเบราว์เซอร์อยู่แล้ว)
-        // ความปลอดภัยจริงอยู่ที่ Firestore Security Rules — ดูไฟล์ firestore.rules ใน repo นี้
-        const userConfig = {
-            apiKey: "AIzaSyAaqQ77vaYMeTMecseqEIu2O-wWUOBMz9A",
-            authDomain: "pb287-4fc76.firebaseapp.com",
-            projectId: "pb287-4fc76",
-            storageBucket: "pb287-4fc76.firebasestorage.app",
-            messagingSenderId: "728935756079",
-            appId: "1:728935756079:web:6d49083763e576203271da"
-        };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
-        const appIdStr = typeof __app_id !== 'undefined' ? __app_id : 'pb287_portal';
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const esc = window.escapeHtml;
-
-        const dataPath = ['artifacts', appIdStr, 'public', 'data'];
-        const alertsRef = collection(db, ...dataPath, 'alerts');
-        const obstaclesRef = collection(db, ...dataPath, 'obstacles');
-        const sosRef = collection(db, ...dataPath, 'sos');
-
-        // addDoc จะค้างตลอดถ้าออฟไลน์ — ตั้ง timeout เพื่อให้หน้าเว็บแจ้งผู้ใช้ได้
-        const withTimeout = (p, ms = 8000) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
-        // สำหรับ SOS/สิ่งกีดขวาง: ถ้าเซิร์ฟเวอร์ไม่ตอบใน 8 วินาที (สัญญาณอ่อน) ถือว่าอยู่ในคิว — Firestore จะส่งต่อให้เองเมื่อเชื่อมต่อได้
-        // ถ้าถูกปฏิเสธ (เช่น permission-denied) จะ reject เพื่อให้หน้าเว็บบันทึกในเครื่องแทน
-        const sendOrQueue = (p, ms = 8000) => Promise.race([p.then(() => 'sent'), new Promise(res => setTimeout(() => res('queued'), ms))]);
-
-        let currentAuthMode = 'login'; // login หรือ reg
-        let isAdmin = false;
-        let lastObstacles = [], lastSos = [];
-        let unsubSos = null;
-
-        // --- ระบบควบคุม UI แอดมิน (Auth) ---
-        window.openAdminLogin = () => {
-            document.getElementById('adminLoginModal').classList.remove('hidden');
-            switchAuthTab('login');
-        };
-
-        window.closeAdminLogin = () => {
-            document.getElementById('adminLoginModal').classList.add('hidden');
-            document.getElementById('adminLoginError').classList.add('hidden');
-        };
-
-        window.switchAuthTab = (mode) => {
-            currentAuthMode = mode;
-            const tabLogin = document.getElementById('tabLogin');
-            const tabReg = document.getElementById('tabReg');
-            const regCodeDiv = document.getElementById('regCodeDiv');
-            const btnSubmit = document.getElementById('btnSubmitAuth');
-            const title = document.getElementById('authTitle');
-
-            document.getElementById('adminLoginError').classList.add('hidden');
-
-            if (mode === 'login') {
-                tabLogin.className = "flex-1 pb-2 border-b-2 border-moph-primary font-bold text-moph-primary transition";
-                tabReg.className = "flex-1 pb-2 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-600 transition";
-                regCodeDiv.classList.add('hidden');
-                btnSubmit.innerText = "เข้าสู่ระบบ (Login)";
-                title.innerText = "EOC Admin Login";
-            } else {
-                tabReg.className = "flex-1 pb-2 border-b-2 border-moph-primary font-bold text-moph-primary transition";
-                tabLogin.className = "flex-1 pb-2 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-600 transition";
-                regCodeDiv.classList.remove('hidden');
-                btnSubmit.innerText = "สร้างบัญชีใหม่ (Register)";
-                title.innerText = "EOC Admin Register";
-            }
-        };
-
-        const authErrorText = (code) => ({
-            'auth/invalid-credential': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
-            'auth/invalid-email': 'รูปแบบอีเมลไม่ถูกต้อง',
-            'auth/email-already-in-use': 'อีเมลนี้ถูกใช้สมัครแล้ว',
-            'auth/weak-password': 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
-            'auth/too-many-requests': 'ลองหลายครั้งเกินไป กรุณารอสักครู่',
-            'auth/network-request-failed': 'เชื่อมต่ออินเทอร์เน็ตไม่ได้'
-        }[code]);
-
-        window.processAuth = async () => {
-            const email = document.getElementById('adminEmail').value.trim();
-            const pwd = document.getElementById('adminPwd').value;
-            const errorEl = document.getElementById('adminLoginError');
-            const btn = document.getElementById('btnSubmitAuth');
-
-            if (!email || !pwd) {
-                errorEl.innerText = "กรุณากรอกอีเมลและรหัสผ่าน"; errorEl.classList.remove('hidden'); return;
-            }
-
-            const oldText = btn.innerText;
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                if (currentAuthMode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, pwd);
-                } else {
-                    // หมายเหตุ: รหัสนี้เป็นแค่ด่านแรกฝั่งหน้าเว็บ สิทธิ์จริงคุมโดย collection "admins" ใน Firestore Rules
-                    const code = document.getElementById('regCode').value.trim();
-                    if (code !== '527499') {
-                        errorEl.innerText = "รหัสยืนยันเจ้าหน้าที่ไม่ถูกต้อง!"; errorEl.classList.remove('hidden'); return;
-                    }
-                    await createUserWithEmailAndPassword(auth, email, pwd);
-                }
-                closeAdminLogin();
-                document.getElementById('adminEmail').value = '';
-                document.getElementById('adminPwd').value = '';
-                document.getElementById('regCode').value = '';
-                openAdminDashboard();
-            } catch (error) {
-                errorEl.innerText = (currentAuthMode === 'login' ? "เข้าสู่ระบบล้มเหลว: " : "สมัครล้มเหลว: ") + (authErrorText(error.code) || error.message);
-                errorEl.classList.remove('hidden');
-            } finally {
-                btn.disabled = false; btn.innerText = oldText;
-            }
-        };
-
-        window.doLogout = async () => {
-            closeAdminDashboard();
-            await signOut(auth);
-            // ล็อกอินแบบไม่ระบุตัวตนแทนเพื่อให้ระบบแผนที่หรือการอ่านข้อมูลทำงานต่อไปได้
-            await signInAnonymously(auth);
-        };
-
-        window.openAdminDashboard = () => document.getElementById('adminDashboardModal').classList.remove('hidden');
-        window.closeAdminDashboard = () => document.getElementById('adminDashboardModal').classList.add('hidden');
-
-        const renderAdminStatus = (user) => {
-            const el = document.getElementById('adminStatus');
-            if (!user || user.isAnonymous) { el.innerHTML = ''; return; }
-            if (isAdmin) {
-                el.className = 'text-xs rounded-lg px-3 py-2 mb-4 bg-green-50 border border-green-200 text-green-800';
-                el.innerHTML = `<i class="fas fa-user-check mr-1"></i> ${esc(user.email)} · สิทธิ์ EOC Admin`;
-            } else {
-                el.className = 'text-xs rounded-lg px-3 py-2 mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800';
-                el.innerHTML = `<i class="fas fa-user-clock mr-1"></i> ${esc(user.email)} · ยังไม่พบสิทธิ์แอดมิน — ให้ผู้ดูแลเพิ่มเอกสาร <code>admins/${esc(user.uid)}</code> ใน Firestore`;
-            }
-        };
-
-        // จัดการสถานะการเข้าสู่ระบบ
-        onAuthStateChanged(auth, async (user) => {
-            const btnOpenLogin = document.getElementById('btnOpenLogin');
-            const btnAdminDash = document.getElementById('btnAdminDash');
-            const btnLogout = document.getElementById('btnLogout');
-
-            isAdmin = false;
-            if (user && !user.isAnonymous) {
-                try { isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists(); } catch (e) { isAdmin = false; }
-                btnOpenLogin.classList.add('hidden');
-                btnAdminDash.classList.remove('hidden');
-                btnLogout.classList.remove('hidden');
-            } else {
-                btnOpenLogin.classList.remove('hidden');
-                btnAdminDash.classList.add('hidden');
-                btnLogout.classList.add('hidden');
-            }
-            renderAdminStatus(user);
-            if (user) {
-                setupHazardStore(user);
-                subscribeSos(user);
-            }
-            rerenderHazards();
-        });
-
-        // --- ระบบฐานข้อมูล Firebase (Real-time Alerts) ---
-        const initAuth = async () => {
-            try {
-                // รอให้ Firebase กู้ session เดิมก่อน — ไม่งั้นแอดมินจะถูกแทนที่ด้วย anonymous ทุกครั้งที่รีเฟรช
-                await auth.authStateReady();
-                if (!auth.currentUser) await signInAnonymously(auth);
-            } catch (error) { console.error("Firebase Auth Error:", error); }
-            listenToAlerts();
-            listenToObstacles();
-        };
-
-        const listenToAlerts = () => {
-            onSnapshot(alertsRef, (snapshot) => {
-                const alerts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                alerts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)); // ใหม่ไปเก่า
-                updateTickerUI(alerts);
-                updateAdminListUI(alerts);
-            }, (error) => console.error("Listen Error:", error));
-        };
-
-        const listenToObstacles = () => {
-            onSnapshot(obstaclesRef, (snapshot) => {
-                lastObstacles = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                rerenderHazards();
-            }, (error) => console.error("Obstacles Error:", error));
-        };
-
-        // แอดมินเห็น SOS ทุกจุด / ประชาชนเห็นเฉพาะ SOS ของตัวเอง (บังคับโดย Firestore Rules)
-        const subscribeSos = (user) => {
-            if (unsubSos) { unsubSos(); unsubSos = null; }
-            const subscribe = (q, fallback) => {
-                unsubSos = onSnapshot(q, (snapshot) => {
-                    lastSos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                    lastSos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    rerenderHazards();
-                }, (error) => {
-                    console.warn("SOS listen:", error.code);
-                    if (fallback) fallback();
-                });
-            };
-            const ownOnly = () => subscribe(query(sosRef, where('uid', '==', user.uid)), null);
-            if (!user.isAnonymous) subscribe(sosRef, ownOnly);
-            else ownOnly();
-        };
-
-        const rerenderHazards = () => {
-            if (!window.renderRemotePins) return;
-            window.renderRemotePins('obstacle', lastObstacles, isAdmin);
-            window.renderRemotePins('sos', lastSos, isAdmin);
-            updateAdminSosUI(lastSos);
-        };
-        window.rerenderHazards = rerenderHazards;
-
-        const setupHazardStore = (user) => {
-            window.hazardStore = {
-                addObstacle: (lat, lng) => sendOrQueue(addDoc(obstaclesRef, { lat, lng, uid: auth.currentUser.uid, timestamp: Date.now() })),
-                addSos: (lat, lng, level, extra = {}) => {
-                    const now = Date.now();
-                    return sendOrQueue(addDoc(sosRef, {
-                        lat, lng, level, status: 'new', uid: auth.currentUser.uid, timestamp: now, updatedAt: now,
-                        people: Number.isInteger(extra.people) ? extra.people : 0,
-                        phone: typeof extra.phone === 'string' ? extra.phone : ''
-                    }));
-                }
-            };
-            if (window.onHazardStoreReady) window.onHazardStoreReady();
-        };
-
-        window.setSosStatus = async (id, status) => {
-            if (!isAdmin) return;
-            try { await withTimeout(updateDoc(doc(db, ...dataPath, 'sos', id), { status, updatedAt: Date.now() })); }
-            catch (e) { console.error(e); window.openModal('อัปเดตสถานะไม่สำเร็จ', e.code === 'permission-denied' ? 'ไม่มีสิทธิ์ (ต้องอยู่ใน collection admins)' : e.message, 'fa-times-circle', 'text-red-500', 'bg-red-50'); }
-        };
-
-        window.deleteHazard = async (type, id) => {
-            if (!isAdmin) return;
-            if (!confirmDelete()) return;
-            const col = type === 'sos' ? 'sos' : 'obstacles';
-            try { await deleteDoc(doc(db, ...dataPath, col, id)); }
-            catch (e) { console.error(e); window.openModal('ลบไม่สำเร็จ', e.message, 'fa-times-circle', 'text-red-500', 'bg-red-50'); }
-        };
-
-        window.flyToSos = (lat, lng) => {
-            closeAdminDashboard();
-            window.switchTab && window.switchTab('risk');
-            setTimeout(() => window.hazardMap && window.hazardMap.flyTo([lat, lng], 16), 150);
-        };
-
-        window.addNewAlert = async () => {
-            if (!auth.currentUser || auth.currentUser.isAnonymous) {
-                window.openModal('ต้องเข้าสู่ระบบ', 'ต้องเข้าสู่ระบบแอดมินก่อนส่งประกาศ', 'fa-lock', 'text-yellow-500', 'bg-yellow-50'); return;
-            }
-            const text = document.getElementById('newAlertText').value.trim().slice(0, 300);
-            const severity = document.getElementById('newAlertSeverity').value;
-            if (!text) return;
-
-            const btn = document.getElementById('btnAddAlert');
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                await withTimeout(addDoc(alertsRef, { text, severity, timestamp: Date.now() }));
-                document.getElementById('newAlertText').value = '';
-            } catch (e) {
-                console.error(e);
-                const msg = e.code === 'permission-denied' ? 'บัญชีนี้ยังไม่มีสิทธิ์ส่งประกาศ (ต้องอยู่ใน collection admins)' : e.message;
-                window.openModal('ส่งประกาศไม่สำเร็จ', msg, 'fa-times-circle', 'text-red-500', 'bg-red-50');
-            }
-            btn.disabled = false; btn.innerHTML = 'ส่งประกาศ';
-        };
-
-        window.deleteAlert = async (docId) => {
-            if (!auth.currentUser || auth.currentUser.isAnonymous) return;
-            if (!confirmDelete()) return;
-            try { await deleteDoc(doc(db, ...dataPath, 'alerts', docId)); }
-            catch (e) { console.error(e); window.openModal('ลบไม่สำเร็จ', e.message, 'fa-times-circle', 'text-red-500', 'bg-red-50'); }
-        };
-        // ใช้ปุ่มกดสองครั้งแทน confirm() เพื่อไม่ให้ dialog ของเบราว์เซอร์บล็อกหน้าเว็บ
-        let pendingDelete = 0;
-        const confirmDelete = () => {
-            const now = Date.now();
-            if (now - pendingDelete < 3000) { pendingDelete = 0; return true; }
-            pendingDelete = now;
-            window.openModal('ยืนยันการลบ', 'กดปุ่มลบอีกครั้งภายใน 3 วินาทีเพื่อยืนยัน', 'fa-trash', 'text-red-500', 'bg-red-50');
-            return false;
-        };
-
-        const severityDot = (s) => ({ red: 'bg-red-500', orange: 'bg-orange-500', yellow: 'bg-yellow-500' }[s] || 'bg-blue-500');
-
-        // อัปเดตแถบวิ่งด้านบนหน้าจอ (escape ข้อความทุกครั้ง กัน XSS)
-        const updateTickerUI = (alerts) => {
-            const tickerContainer = document.getElementById('live-ticker');
-            if (alerts.length === 0) {
-                tickerContainer.innerHTML = '<span class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full status-dot"></div> <span class="lang-th">สถานการณ์ปกติ ไม่มีประกาศแจ้งเตือนภัยพิบัติในขณะนี้</span><span class="lang-en">Normal situation. No active disaster alerts.</span></span>';
-                return;
-            }
-            let html = '';
-            alerts.forEach(a => {
-                html += `<span class="flex items-center gap-2 mx-12"><div class="w-2 h-2 ${severityDot(a.severity)} rounded-full status-dot"></div> ${esc(a.text)}</span>`;
-            });
-            tickerContainer.innerHTML = html + html;
-        };
-
-        // อัปเดตตารางของแอดมิน
-        const updateAdminListUI = (alerts) => {
-            const listContainer = document.getElementById('adminAlertList');
-            if (alerts.length === 0) {
-                listContainer.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">ไม่มีประกาศที่กำลังใช้งาน</p>';
-                return;
-            }
-            listContainer.innerHTML = alerts.map(a => {
-                const colorName = a.severity === 'red' ? 'แดง (วิกฤต)' :
-                                  a.severity === 'orange' ? 'ส้ม (เตือนภัย)' :
-                                  a.severity === 'yellow' ? 'เหลือง (เฝ้าระวัง)' : 'น้ำเงิน (ทั่วไป)';
-                return `
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition gap-2">
-                        <div class="min-w-0">
-                            <p class="text-sm font-bold text-gray-800 break-words">${esc(a.text)}</p>
-                            <p class="text-xs text-gray-500 mt-1"><span class="inline-block w-2 h-2 rounded-full ${severityDot(a.severity)} mr-1"></span>ระดับ: <span class="font-semibold">${colorName}</span> · ${window.fmtTime(a.timestamp)}</p>
-                        </div>
-                        <button onclick="deleteAlert('${esc(a.id)}')" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition flex-shrink-0" title="ลบประกาศนี้">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>`;
-            }).join('');
-        };
-
-        let showDoneSos = false;
-        window.toggleDoneSos = () => { showDoneSos = !showDoneSos; updateAdminSosUI(lastSos); };
-        const updateAdminSosUI = (items) => {
-            const list = document.getElementById('adminSosList');
-            const countEl = document.getElementById('sosCount');
-            if (!isAdmin) {
-                countEl.innerText = '-';
-                list.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">เฉพาะบัญชีที่อยู่ใน admins เท่านั้นที่เห็นคำขอ SOS</p>';
-                return;
-            }
-            const active = items.filter(s => s.status !== 'done');
-            const done = items.filter(s => s.status === 'done');
-            countEl.innerText = active.length;
-            const order = { red: 0, yellow: 1, green: 2 }, stOrder = { new: 0, enroute: 1 };
-            const sorted = [...active].sort((a, b) => (stOrder[a.status] ?? 0) - (stOrder[b.status] ?? 0) || (order[a.level] ?? 0) - (order[b.level] ?? 0) || (b.timestamp || 0) - (a.timestamp || 0));
-            const label = { red: 'แดง (วิกฤต)', yellow: 'เหลือง (เร่งด่วน)', green: 'เขียว (รอได้)' };
-            const dot = { red: 'bg-red-500', yellow: 'bg-yellow-500', green: 'bg-green-500' };
-            const badge = (st) => st === 'enroute' ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">ทีมกำลังไป</span>'
-                : st === 'done' ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">ช่วยแล้ว</span>'
-                : '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">รอรับเรื่อง</span>';
-            const row = (s) => `
-                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="flex justify-between items-start gap-2">
-                        <div class="min-w-0 text-xs text-gray-600">
-                            <p class="text-sm font-bold text-gray-800"><span class="inline-block w-2.5 h-2.5 rounded-full ${dot[s.level] || 'bg-red-500'} mr-1"></span>${label[s.level] || label.red} ${badge(s.status)}</p>
-                            <p>${window.fmtTime(s.timestamp)}${s.people ? ' · ' + esc(s.people) + ' คน' : ''}</p>
-                            ${s.phone ? `<p><a class="text-blue-600 underline" href="tel:${esc(s.phone)}"><i class="fas fa-phone"></i> ${esc(s.phone)}</a></p>` : ''}
-                        </div>
-                        <div class="flex gap-1 flex-shrink-0">
-                            <button onclick="flyToSos(${Number(s.lat)}, ${Number(s.lng)})" class="text-blue-600 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg" title="ดูบนแผนที่"><i class="fas fa-map-marker-alt"></i></button>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${Number(s.lat)},${Number(s.lng)}" target="_blank" rel="noopener" class="text-green-700 bg-green-50 hover:bg-green-100 p-2 rounded-lg" title="นำทาง"><i class="fas fa-route"></i></a>
-                            <button onclick="deleteHazard('sos','${esc(s.id)}')" class="text-gray-400 hover:text-red-500 p-2 rounded-lg" title="ลบถาวร"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="flex gap-1 mt-2">
-                        ${s.status === 'done'
-                            ? `<button onclick="setSosStatus('${esc(s.id)}','new')" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded"><i class="fas fa-rotate-left"></i> เปิดเคสใหม่</button>`
-                            : `${s.status !== 'enroute' ? `<button onclick="setSosStatus('${esc(s.id)}','enroute')" class="text-xs bg-blue-600 text-white px-2 py-1 rounded"><i class="fas fa-truck-medical"></i> ส่งทีม</button>` : ''}
-                               <button onclick="setSosStatus('${esc(s.id)}','done')" class="text-xs bg-green-600 text-white px-2 py-1 rounded"><i class="fas fa-check"></i> ช่วยแล้ว</button>`}
-                    </div>
-                </div>`;
-            let html = sorted.length ? sorted.map(row).join('') : '<p class="text-sm text-gray-500 text-center py-4">ไม่มีคำขอ SOS ที่ค้างอยู่</p>';
-            if (done.length) {
-                html += `<button onclick="toggleDoneSos()" class="w-full text-xs text-gray-500 underline py-2">${showDoneSos ? 'ซ่อน' : 'แสดง'}เคสที่ช่วยแล้ว (${done.length})</button>`;
-                if (showDoneSos) html += done.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map(row).join('');
-            }
-            list.innerHTML = html;
-        };
-
-        initAuth();
-    </script>
+    <script src="/js/app.js"></script>
+    <script type="module" src="/js/cloud.js"></script>
 </body>
 </html>
